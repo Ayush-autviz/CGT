@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation"
 import { resetPassword } from "@/lib/ApiService"
 import { toast } from "sonner"
 
-export default function ResetPasswordPage({ params }: { params: { id: string } }) {
+export default function ResetPasswordPage({ params }: { params: any }) {
 
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
