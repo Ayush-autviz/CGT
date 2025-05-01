@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { CheckCircle, XCircle, Loader2 } from "lucide-react"
+import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -35,7 +35,6 @@ export default function VerifyEmailPage({ params }: { params: any }) {
       }
     }
     
-
     verifyEmail()
   }, [params.token])
 
@@ -44,30 +43,32 @@ export default function VerifyEmailPage({ params }: { params: any }) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0F172A] p-4">
+    <div className="flex min-h-screen items-center justify-center bg-[#0F172A] p-4 overflow-auto">
       <Card className="w-full max-w-md border-0 bg-[#1E293B] text-white shadow-xl">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Email Verification</CardTitle>
-          <CardDescription className="text-[#A4A4A4]">
+        <CardHeader className="text-center py-3 md:py-4">
+          <CardTitle className="text-xl md:text-2xl font-bold">Email Verification</CardTitle>
+          <CardDescription className="text-[#A4A4A4] text-sm md:text-base">
             {verificationState === "loading" && "Verifying your email address..."}
             {verificationState === "success" && "Your email has been verified!"}
             {verificationState === "error" && "Verification failed"}
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center py-6">
+        <CardContent className="flex flex-col items-center justify-center py-4 md:py-5">
           {verificationState === "loading" && (
-            <div className="flex flex-col items-center gap-4">
-              <Loader2 className="h-16 w-16 animate-spin text-amber-500" />
-              <p className="text-center text-[#A4A4A4]">Please wait while we verify your email address...</p>
+            <div className="flex flex-col items-center gap-3 md:gap-4">
+              <Loader2 className="h-12 w-12 md:h-14 md:w-14 animate-spin text-amber-500" />
+              <p className="text-center text-sm md:text-base text-[#A4A4A4]">
+                Please wait while we verify your email address...
+              </p>
             </div>
           )}
 
           {verificationState === "success" && (
-            <div className="flex flex-col items-center gap-4">
-              <CheckCircle className="h-16 w-16 text-green-500" />
+            <div className="flex flex-col items-center gap-3 md:gap-4">
+              <CheckCircle className="h-12 w-12 md:h-14 md:w-14 text-green-500" />
               <div className="text-center">
-                <p className="text-lg font-medium">Verification Successful!</p>
-                <p className="mt-2 text-[#A4A4A4]">
+                <p className="text-base md:text-lg font-medium">Verification Successful!</p>
+                <p className="mt-1 md:mt-2 text-sm md:text-base text-[#A4A4A4]">
                   Your email has been verified successfully. You can now log in to your account.
                 </p>
               </div>
@@ -75,19 +76,19 @@ export default function VerifyEmailPage({ params }: { params: any }) {
           )}
 
           {verificationState === "error" && (
-            <div className="flex flex-col items-center gap-4">
-              <XCircle className="h-16 w-16 text-red-500" />
+            <div className="flex flex-col items-center gap-3 md:gap-4">
+              <XCircle className="h-12 w-12 md:h-14 md:w-14 text-red-500" />
               <div className="text-center">
-                <p className="text-lg font-medium">Verification Failed</p>
-                <p className="mt-2 text-[#A4A4A4]">{errorMessage}</p>
+                <p className="text-base md:text-lg font-medium">Verification Failed</p>
+                <p className="mt-1 md:mt-2 text-sm md:text-base text-[#A4A4A4]">{errorMessage}</p>
               </div>
             </div>
           )}
         </CardContent>
-        <CardFooter>
+        <CardFooter className="py-3 md:py-4">
           <Button
             onClick={handleRedirectToLogin}
-            className="w-full bg-amber-500 text-black hover:bg-amber-600"
+            className="w-full bg-amber-500 text-black hover:bg-amber-600 py-2 md:py-3"
             disabled={verificationState === "loading"}
           >
             {verificationState === "success" ? "Proceed to Login" : "Back to Login"}

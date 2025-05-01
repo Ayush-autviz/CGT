@@ -2,11 +2,11 @@
 
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { Mail } from "lucide-react"
+import { Mail } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { useMutation } from "@tanstack/react-query"
 import { resendVerification } from "@/lib/ApiService"
-import { toast } from "sonner" // Import Sonner Toaster and toast
+import { toast } from "sonner"
 
 export default function VerificationPage() {
   const searchParams = useSearchParams()
@@ -15,14 +15,12 @@ export default function VerificationPage() {
   const resendMutation = useMutation({
     mutationFn: resendVerification,
     onSuccess: () => {
-      // Show success toast
       toast.success("Verification Email Sent", {
         description: "A new verification link has been sent to your email.",
         duration: 3000,
       })
     },
     onError: (error: any) => {
-      // Show error toast
       toast.error("Failed to Resend", {
         description: error.message || "Unable to resend verification email. Please try again.",
         duration: 5000,
@@ -34,7 +32,6 @@ export default function VerificationPage() {
     if (email) {
       resendMutation.mutate({ email })
     } else {
-      // Show warning toast
       toast.warning("Email Not Found", {
         description: "No email address provided. Please try again from the sign-up page.",
         duration: 5000,
@@ -43,35 +40,35 @@ export default function VerificationPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#0A0F1D] items-center justify-center p-4">
-      <div className="w-full max-w-md bg-[#1E2634] rounded-2xl p-8 text-center">
-        <div className="mx-auto w-16 h-16 bg-[#F6BE00]/20 rounded-full flex items-center justify-center mb-6">
-          <Mail className="h-8 w-8 text-[#F6BE00]" />
+    <div className="flex min-h-screen bg-[#0A0F1D] items-center justify-center p-4 overflow-auto">
+      <div className="w-full max-w-md bg-[#1E2634] rounded-2xl p-4 md:p-6 text-center">
+        <div className="mx-auto w-12 h-12 md:w-14 md:h-14 bg-[#F6BE00]/20 rounded-full flex items-center justify-center mb-4 md:mb-5">
+          <Mail className="h-6 w-6 md:h-7 md:w-7 text-[#F6BE00]" />
         </div>
 
-        <h1 className="text-2xl font-bold text-white mb-3">Check your email</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3">Check your email</h1>
 
-        <p className="text-[#A6A6A6] mb-6">
+        <p className="text-[#A6A6A6] text-sm md:text-base mb-4 md:mb-5">
           We've sent a verification link to {email || "your email address"}. Please check your inbox and click the link to
           verify your account.
         </p>
 
-        <div className="bg-[#0A0F1D] rounded-lg p-4 mb-6">
-          <p className="text-sm text-[#A6A6A6]">
+        <div className="bg-[#0A0F1D] rounded-lg p-3 md:p-4 mb-4 md:mb-5">
+          <p className="text-xs md:text-sm text-[#A6A6A6]">
             If you don't see the email in your inbox, please check your spam folder or request a new verification link.
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3 md:space-y-4">
           <Button
             onClick={handleResend}
             disabled={resendMutation.isPending}
-            className="w-full bg-[#F6BE00] hover:bg-yellow-600 text-black font-bold py-3 rounded-md"
+            className="w-full bg-[#F6BE00] hover:bg-yellow-600 text-black font-bold py-2 md:py-3 rounded-md"
           >
             {resendMutation.isPending ? (
               <span className="flex items-center">
                 <svg
-                  className="animate-spin h-5 w-5 mr-2 text-black"
+                  className="animate-spin h-4 w-4 mr-2 text-black"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -92,12 +89,12 @@ export default function VerificationPage() {
                 </svg>
                 Sending...
               </span>
-) : (
+            ) : (
               "Resend verification email"
             )}
           </Button>
 
-          <p className="text-sm text-[#A6A6A6]">
+          <p className="text-xs md:text-sm text-[#A6A6A6]">
             Already verified?{" "}
             <Link href="/auth/login" className="text-[#F6BE00] hover:underline">
               Sign In

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { useMutation } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { resetPasswordLink } from "@/lib/ApiService"
-import {  toast } from "sonner" // Import Sonner Toaster and toast
+import { toast } from "sonner"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
@@ -18,7 +18,6 @@ export default function ForgotPasswordPage() {
   const mutation = useMutation({
     mutationFn: resetPasswordLink,
     onSuccess: () => {
-      // Show success toast
       toast.success("Reset Link Sent", {
         description: "A password reset link has been sent to your email.",
         duration: 3000,
@@ -27,7 +26,6 @@ export default function ForgotPasswordPage() {
     },
     onError: (error: any) => {
       console.error("Password reset request failed:", error)
-      // Show error toast
       toast.error("Request Failed", {
         description: error.message || "Unable to send reset link. Please try again.",
         duration: 5000,
@@ -41,19 +39,21 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#0A0F1D]">
+    <div className="flex min-h-screen bg-[#0A0F1D] overflow-auto">
       <div className="flex flex-col md:flex-row w-full">
         {/* Left Side - Form */}
-        <div className="w-full md:w-1/2 flex flex-col justify-center items-end p-12">
-          <div className="w-full max-w-xl space-y-8">
-            <div className="text-center mb-5">
-              <h1 className="text-3xl font-bold text-white">Forgot Password</h1>
-              <p className="mt-2 text-white font-semibold">Enter your email to reset your password</p>
+        <div className="w-full md:w-1/2 flex flex-col justify-center items-center md:items-end p-4 md:p-6 lg:p-8">
+          <div className="w-full max-w-md lg:max-w-lg space-y-4 md:space-y-6">
+            <div className="text-center mb-3 md:mb-4">
+              <h1 className="text-2xl md:text-3xl font-bold text-white">Forgot Password</h1>
+              <p className="mt-1 md:mt-2 text-white font-semibold text-sm md:text-base">
+                Enter your email to reset your password
+              </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <label htmlFor="email" className="block font-semibold text-white">
+            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
+              <div className="space-y-1 md:space-y-2">
+                <label htmlFor="email" className="block font-semibold text-white text-sm md:text-base">
                   Email Address
                 </label>
                 <Input
@@ -63,20 +63,20 @@ export default function ForgotPasswordPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="bg-[#1E2634] rounded-[10px] px-8 py-5 border-[#323D50] text-white placeholder:text-gray-500"
+                  className="bg-[#1E2634] rounded-[10px] px-4 md:px-8 py-3 md:py-4 border-[#323D50] text-white placeholder:text-gray-500"
                   required
                 />
               </div>
 
               <Button
                 type="submit"
-                className="w-full bg-[#F6BE00] hover:bg-yellow-600 text-black font-bold py-6 rounded-md flex items-center justify-center"
+                className="w-full bg-[#F6BE00] hover:bg-yellow-600 text-black font-bold py-3 md:py-4 lg:py-5 rounded-md flex items-center justify-center"
                 disabled={mutation.isPending}
               >
                 {mutation.isPending ? (
                   <span className="flex items-center">
                     <svg
-                      className="animate-spin h-5 w-5 mr-2 text-black"
+                      className="animate-spin h-4 w-4 mr-2 text-black"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -102,7 +102,7 @@ export default function ForgotPasswordPage() {
                     Send Reset Link
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 ml-2"
+                      className="h-4 w-4 ml-2"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >
@@ -117,8 +117,8 @@ export default function ForgotPasswordPage() {
               </Button>
             </form>
 
-            <div className="mt-6 text-center">
-              <p className="text-[#A6A6A6]">
+            <div className="mt-4 md:mt-5 text-center">
+              <p className="text-[#A6A6A6] text-xs md:text-sm">
                 Remember your password?{" "}
                 <Link href="/auth/login" className="text-[#F6BE00] hover:underline">
                   Back to Login
@@ -126,7 +126,7 @@ export default function ForgotPasswordPage() {
               </p>
             </div>
 
-            <div className="mt-8 text-center text-xs text-[#A6A6A6]">
+            <div className="mt-4 md:mt-6 text-center text-xs text-[#A6A6A6]">
               Capital Growth Traders Ltd. Registered in London, UK. Authorized and regulated by the Financial Conduct
               Authority.
             </div>
@@ -134,28 +134,30 @@ export default function ForgotPasswordPage() {
         </div>
 
         {/* Right Side - Promo */}
-        <div className="hidden md:flex md:w-1/2 justify-start items-center p-12">
+        <div className="hidden md:flex md:w-1/2 justify-start items-center p-4 md:p-6 lg:p-8">
           <div className="w-full max-w-xl">
-            <div className="bg-[#F3A82A] rounded-3xl p-6">
-              <div className="bg-black rounded-2xl overflow-hidden mb-6">
+            <div className="bg-[#F3A82A] rounded-3xl p-3 md:p-4 lg:p-5">
+              <div className="bg-black rounded-2xl overflow-hidden mb-3 md:mb-4">
                 <Image src="/login.png" alt="AI Trading Robot" width={500} height={400} className="w-full" />
               </div>
 
               <div className="text-white">
-                <h2 className="text-3xl font-bold mb-2">AI-Powered Trading with 5,000+ Smart Traders</h2>
+                <h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-2">
+                  AI-Powered Trading with 5,000+ Smart Traders
+                </h2>
 
-                <div className="grid grid-cols-3 gap-4 mt-6">
-                  <div className="bg-white rounded-xl py-4 text-center">
-                    <div className="text-4xl font-bold text-yellow-500 whitespace-nowrap">98%</div>
-                    <div className="text-sm text-yellow-500 whitespace-nowrap">Success Rate</div>
+                <div className="grid grid-cols-3 gap-2 md:gap-3 mt-3 md:mt-4">
+                  <div className="bg-white rounded-xl py-2 md:py-3 text-center">
+                    <div className="text-xl md:text-2xl lg:text-3xl font-bold text-yellow-500">98%</div>
+                    <div className="text-xs text-yellow-500">Success Rate</div>
                   </div>
-                  <div className="bg-white rounded-xl p-4 text-center">
-                    <div className="text-4xl font-bold text-yellow-500 whitespace-nowrap">24/7</div>
-                    <div className="text-sm text-yellow-500 whitespace-nowrap">Active Trading</div>
+                  <div className="bg-white rounded-xl py-2 md:py-3 text-center">
+                    <div className="text-xl md:text-2xl lg:text-3xl font-bold text-yellow-500">24/7</div>
+                    <div className="text-xs text-yellow-500">Active Trading</div>
                   </div>
-                  <div className="bg-white rounded-xl p-4 text-center">
-                    <div className="text-4xl font-bold text-yellow-500 whitespace-nowrap">5K+</div>
-                    <div className="text-sm text-yellow-500 whitespace-nowrap">Active Users</div>
+                  <div className="bg-white rounded-xl py-2 md:py-3 text-center">
+                    <div className="text-xl md:text-2xl lg:text-3xl font-bold text-yellow-500">5K+</div>
+                    <div className="text-xs text-yellow-500">Active Users</div>
                   </div>
                 </div>
               </div>
