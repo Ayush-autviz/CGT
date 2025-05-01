@@ -13,7 +13,6 @@ import useAuthStore from "@/stores/authStore"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
-
 export default function LoginPage() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
@@ -23,7 +22,6 @@ export default function LoginPage() {
   })
 
   const { setAuth } = useAuthStore()
-
 
   const mutation = useMutation({
     mutationFn: loginUser,
@@ -53,26 +51,26 @@ export default function LoginPage() {
   }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Form submission prevented");
-    console.log("Login data:", formData);
+    e.preventDefault()
+    console.log("Form submission prevented")
+    console.log("Login data:", formData)
     try {
-      mutation.mutate(formData);
+      mutation.mutate(formData)
     } catch (error) {
-      console.error("Unexpected error during mutation:", error);
+      console.error("Unexpected error during mutation:", error)
       toast.error("An unexpected error occurred", {
         description: "Please try again later.",
         duration: 5000,
-      });
+      })
     }
-  };
+  }
 
   return (
-    <div className="flex min-h-screen bg-[#0A0F1D]">
+    <div className="flex max-h-screen bg-[#0A0F1D]">
       <div className="flex flex-col md:flex-row w-full">
         {/* Left Side - Form */}
-        <div className="w-full md:w-1/2 flex flex-col justify-center items-center md:items-end p-12">
-          <div className="w-full max-w-xl space-y-8">
+        <div className="w-full md:w-1/2 flex flex-col justify-center items-center md:items-end p-6 md:p-8 lg:p-12">
+          <div className="w-full max-w-md lg:max-w-xl space-y-6 lg:space-y-8">
             <div className="text-center mb-5">
               <h1 className="text-3xl font-bold text-white">Hello Again!</h1>
               <p className="mt-2 text-white font-semibold">Welcome back to your trading platform</p>
@@ -192,28 +190,30 @@ export default function LoginPage() {
         </div>
 
         {/* Right Side - Promo */}
-        <div className="hidden md:flex md:w-1/2 justify-start items-center p-12">
+        <div className="hidden md:flex md:w-1/2 justify-start items-center p-6 lg:p-12">
           <div className="w-full max-w-xl">
-            <div className="bg-[#F3A82A] rounded-3xl p-6">
+            <div className="bg-[#F3A82A] rounded-3xl p-4 lg:p-6">
               <div className="bg-black rounded-2xl overflow-hidden mb-6">
                 <Image src="/login.png" alt="AI Trading Robot" width={500} height={400} className="w-full" />
               </div>
 
               <div className="text-white">
-                <h2 className="text-3xl font-bold mb-2">AI-Powered Trading with 5,000+ Smart Traders</h2>
+                <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mb-2">
+                  AI-Powered Trading with 5,000+ Smart Traders
+                </h2>
 
-                <div className="grid grid-cols-3 gap-4 mt-6">
-                  <div className="bg-white rounded-xl py-4 text-center">
-                    <div className="text-4xl font-bold text-yellow-500 whitespace-nowrap">98%</div>
-                    <div className="text-sm text-yellow-500 whitespace-nowrap">Success Rate</div>
+                <div className="grid grid-cols-3 gap-2 md:gap-4 mt-4 md:mt-6">
+                  <div className="bg-white rounded-xl py-2 md:py-4 text-center">
+                    <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-yellow-500">98%</div>
+                    <div className="text-xs md:text-sm text-yellow-500">Success Rate</div>
                   </div>
-                  <div className="bg-white rounded-xl p-4 text-center">
-                    <div className="text-4xl font-bold text-yellow-500 whitespace-nowrap">24/7</div>
-                    <div className="text-sm text-yellow-500 whitespace-nowrap">Active Trading</div>
+                  <div className="bg-white rounded-xl p-2 md:p-4 text-center">
+                    <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-yellow-500">24/7</div>
+                    <div className="text-xs md:text-sm text-yellow-500">Active Trading</div>
                   </div>
-                  <div className="bg-white rounded-xl p-4 text-center">
-                    <div className="text-4xl font-bold text-yellow-500 whitespace-nowrap">5K+</div>
-                    <div className="text-sm text-yellow-500 whitespace-nowrap">Active Users</div>
+                  <div className="bg-white rounded-xl p-2 md:p-4 text-center">
+                    <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-yellow-500">5K+</div>
+                    <div className="text-xs md:text-sm text-yellow-500">Active Users</div>
                   </div>
                 </div>
               </div>
