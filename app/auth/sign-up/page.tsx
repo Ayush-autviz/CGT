@@ -68,7 +68,7 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#0A0F1D]">
+    <div className="flex max-h-screen bg-[#0A0F1D]">
       <div className="flex flex-col md:flex-row w-full">
         {/* Left Side - Form */}
         <div className="w-full md:w-1/2 flex flex-col justify-center items-center md:items-end p-12">
