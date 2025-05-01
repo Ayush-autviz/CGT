@@ -196,7 +196,7 @@ export default function LoginPage() {
 
         {/* Right Side - Promo */}
         <div className="hidden md:flex md:w-1/2 justify-start items-center p-4 md:p-6 lg:p-8">
-          <div className="w-full max-w-xl">
+          <div className="w-full max-w-md">
             <div className="bg-[#F3A82A] rounded-3xl p-3 md:p-4 lg:p-5">
               <div className="bg-black rounded-2xl overflow-hidden mb-3 md:mb-4">
                 <Image src="/login.png" alt="AI Trading Robot" width={500} height={400} className="w-full" />
