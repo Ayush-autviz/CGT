@@ -17,7 +17,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }, [user, router]);
 
   return (
-    <div className="min-h-screen">
+    <div className="max-h-screen">
       {children}
     </div>
   );
