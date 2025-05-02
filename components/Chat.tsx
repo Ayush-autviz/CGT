@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useSearchParams } from "next/navigation"
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { BotIcon as Robot } from "lucide-react"
 import Image from "next/image"
@@ -41,7 +41,7 @@ interface Message {
 const BASE_URL = "https://lwj8k3bb-5000.inc1.devtunnels.ms"
 
 export function ChatInterface() {
-  const searchParams = useSearchParams()
+
   const queryClient = useQueryClient()
   const { activeSessionId, setActiveSessionId } = useSessionStore()
 

@@ -188,7 +188,7 @@ export default function LoginPage() {
             </div>
 
             <div className="mt-4 md:mt-6 text-center text-xs text-[#A6A6A6]">
-              Capital Growth Traders Ltd. Registered in London, UK. Authorized and regulated by the Financial Conduct
+              Capital Growth Traders Ltd. Registered in Australia. Authorized and regulated by the Financial Conduct
               Authority.
             </div>
           </div>
