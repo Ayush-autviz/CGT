@@ -36,11 +36,34 @@ export default function SignUpPage() {
     },
     onError: (error: any) => {
       console.error("Sign up failed:", error)
-      // Show error toast
-      toast.error("Sign Up Failed", {
-        description: error.message || "Something went wrong. Please try again.",
-        duration: 5000,
-      })
+
+      // Extract error message from axios error response if available
+      let errorMessage = "Something went wrong. Please try again."
+
+      // Log the full error for debugging
+      console.log("Full error object:", error)
+
+      // Check for the specific error format { "error": "message" }
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+
+      // Show error toast with custom styling
+      setTimeout(() => {
+        toast.error("Sign Up Failed", {
+          description: errorMessage,
+          duration: 8000, // Increased duration to ensure visibility
+          style: {
+            background: '#FEE2E2', // Light red background
+            border: '1px solid #F87171', // Red border
+            color: '#B91C1C', // Dark red text
+          },
+        })
+      }, 100) // Small delay to ensure the toast is displayed after any potential state changes
     },
   })
 
@@ -60,6 +83,11 @@ export default function SignUpPage() {
       toast.warning("Terms Not Accepted", {
         description: "You must agree to the Terms and Conditions to sign up.",
         duration: 5000,
+        style: {
+          background: '#FEF3C7', // Light yellow background
+          border: '1px solid #F59E0B', // Amber border
+          color: '#92400E', // Dark amber text
+        },
       })
       return
     }
@@ -69,7 +97,7 @@ export default function SignUpPage() {
 
   return (
     <div className="flex min-h-screen bg-[#0A0F1D] overflow-auto">
-      <div className="flex flex-col md:flex-row w-full">
+      <div className="flex flex-col justify-center md:flex-row w-full">
         {/* Left Side - Form */}
         <div className="w-full md:w-1/2 flex flex-col justify-center items-center md:items-end p-4 md:p-6 lg:p-8">
           <div className="w-full max-w-md lg:max-w-lg space-y-4 md:space-y-6">

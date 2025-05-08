@@ -68,7 +68,7 @@ export default function ResetPasswordPage({ params }: { params: any }) {
 
   return (
     <div className="flex min-h-screen bg-[#0A0F1D] overflow-auto">
-      <div className="flex flex-col md:flex-row w-full">
+      <div className="flex flex-col justify-center md:flex-row w-full">
         {/* Left Side - Form */}
         <div className="w-full md:w-1/2 flex flex-col justify-center items-center md:items-end p-4 md:p-6 lg:p-8">
           <div className="w-full max-w-md lg:max-w-lg space-y-4 md:space-y-6">

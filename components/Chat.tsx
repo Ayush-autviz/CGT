@@ -15,6 +15,9 @@ import { useSessionStore } from "@/stores/sessionStore"
 import { createSession, createSessionMessage, getSessionMessages } from "@/lib/ApiService"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog"
 import { ClipLoader } from "react-spinners"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+import { toast } from "sonner"
 
 // Typing Indicator Component
 const TypingIndicator = () => (
@@ -73,6 +76,43 @@ export function ChatInterface() {
       setActiveSessionId(data.id)
       setNewSessionTitle("")
       setIsDialogOpen(false)
+
+      // Show success toast
+      toast.success("Session Created", {
+        description: "New chat session created successfully.",
+        duration: 3000,
+      })
+    },
+    onError: (error: any) => {
+      console.error("Session creation failed:", error)
+
+      // Extract error message from axios error response if available
+      let errorMessage = "Failed to create session. Please try again."
+
+      // Log the full error for debugging
+      console.log("Full error object:", error)
+
+      // Check for the specific error format { "error": "message" }
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+
+      // Show error toast with custom styling
+      setTimeout(() => {
+        toast.error("Session Creation Failed", {
+          description: errorMessage,
+          duration: 8000, // Increased duration to ensure visibility
+          style: {
+            background: '#FEE2E2', // Light red background
+            border: '1px solid #F87171', // Red border
+            color: '#B91C1C', // Dark red text
+          },
+        })
+      }, 100) // Small delay to ensure the toast is displayed after any potential state changes
     },
   })
 
@@ -117,8 +157,37 @@ export function ChatInterface() {
       setIsTyping(false)
       //setTimeout(() => setIsTyping(false), 1000) // Adjust delay as needed
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Error sending message:", error)
       setIsTyping(false) // Hide typing indicator on error
+
+      // Extract error message from axios error response if available
+      let errorMessage = "Failed to send message. Please try again."
+
+      // Log the full error for debugging
+      console.log("Full error object:", error)
+
+      // Check for the specific error format { "error": "message" }
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+
+      // Show error toast with custom styling
+      setTimeout(() => {
+        toast.error("Message Failed", {
+          description: errorMessage,
+          duration: 8000, // Increased duration to ensure visibility
+          style: {
+            background: '#FEE2E2', // Light red background
+            border: '1px solid #F87171', // Red border
+            color: '#B91C1C', // Dark red text
+          },
+        })
+      }, 100) // Small delay to ensure the toast is displayed after any potential state changes
     },
   })
 
@@ -134,7 +203,15 @@ export function ChatInterface() {
     if (!input.trim() && attachments.length === 0) return
 
     if (!activeSessionId) {
-      alert("Please create or select a session first")
+      toast.warning("No Active Session", {
+        description: "Please create or select a session first.",
+        duration: 5000,
+        style: {
+          background: '#FEF3C7', // Light yellow background
+          border: '1px solid #F59E0B', // Amber border
+          color: '#92400E', // Dark amber text
+        },
+      })
       return
     }
 
@@ -267,9 +344,38 @@ export function ChatInterface() {
                   message.role === "user"
                     ? "rounded-bl-[10px] bg-white text-black"
                     : "rounded-br-[10px] bg-[#1E293B] text-white"
-                } rounded-t-[10px]`}
+                } rounded-t-[10px] markdown-content`}
               >
-                {message.content}
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    // Style code blocks
+                    code: ({className, children, ...props}: any) => {
+                      const isInline = !className
+                      return isInline ? (
+                        <code className="bg-gray-200 text-gray-800 px-1 py-0.5 rounded text-sm" {...props}>
+                          {children}
+                        </code>
+                      ) : (
+                        <pre className="bg-gray-800 p-2 rounded text-sm overflow-x-auto">
+                          <code className={className} {...props}>
+                            {children}
+                          </code>
+                        </pre>
+                      )
+                    },
+                    // Style links
+                    a: ({children, ...props}: any) => {
+                      return (
+                        <a className="text-amber-500 hover:underline" {...props}>
+                          {children}
+                        </a>
+                      )
+                    }
+                  }}
+                >
+                  {message.content}
+                </ReactMarkdown>
                 {message.file_url && (
                   <div className="mt-2">
                     <Image
@@ -335,7 +441,7 @@ export function ChatInterface() {
           </div>
         ))}
         {isTyping && <TypingIndicator />}
-       
+
       </div>
 
       {attachments.length > 0 && (
@@ -411,7 +517,7 @@ export function ChatInterface() {
             </Button>
           </div>
         </div>
-       
+
       </div>
       <div ref={messagesEndRef} />
     </div>

@@ -33,15 +33,41 @@ export default function LoginPage() {
         description: "Welcome back! Redirecting to your dashboard...",
         duration: 3000,
       })
-      router.push("/main")
+      // Delay navigation to ensure toast is visible
+      setTimeout(() => {
+        router.push("/main")
+      }, 1000)
     },
     onError: (error: any) => {
       console.error("Login failed:", error)
-      // Show error toast
-      toast.error("Login Failed", {
-        description: error.message || "Invalid email or password. Please try again.",
-        duration: 5000,
-      })
+      // Extract error message from axios error response if available
+      let errorMessage = "Invalid email or password. Please try again."
+
+      // Log the full error for debugging
+      console.log("Full error object:", error)
+
+      // Check for the specific error format { "error": "Invalid email or password" }
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+
+      // Ensure we're not in the middle of a page transition
+      setTimeout(() => {
+        // Show error toast with longer duration and custom styling
+        toast.error("Login Failed", {
+          description: errorMessage,
+          duration: 8000, // Increased duration to ensure visibility
+          style: {
+            background: '#FEE2E2', // Light red background
+            border: '1px solid #F87171', // Red border
+            color: '#B91C1C', // Dark red text
+          },
+        })
+      }, 100) // Small delay to ensure the toast is displayed after any potential state changes
     },
   })
 
@@ -51,23 +77,55 @@ export default function LoginPage() {
   }
 
   const handleSubmit = (e: React.FormEvent) => {
+    // Prevent the default form submission behavior
     e.preventDefault()
+    e.stopPropagation() // Also stop propagation to be extra safe
+
     console.log("Form submission prevented")
     console.log("Login data:", formData)
+
+    // Validate form data before submitting
+    if (!formData.email || !formData.password) {
+      toast.error("Missing Information", {
+        description: "Please enter both email and password.",
+        duration: 5000,
+        style: {
+          background: '#FEE2E2', // Light red background
+          border: '1px solid #F87171', // Red border
+          color: '#B91C1C', // Dark red text
+        },
+      })
+      return
+    }
+
+    // Use the mutation to handle the login
+    // The try-catch here only catches synchronous errors, not promise rejections
+    // The mutation's onError handler will catch API errors
     try {
-      mutation.mutate(formData)
+      // Disable any form submission while we're processing
+      if (!mutation.isPending) {
+        mutation.mutate(formData)
+      }
     } catch (error) {
       console.error("Unexpected error during mutation:", error)
       toast.error("An unexpected error occurred", {
         description: "Please try again later.",
-        duration: 5000,
+        duration: 8000,
+        style: {
+          background: '#FEE2E2', // Light red background
+          border: '1px solid #F87171', // Red border
+          color: '#B91C1C', // Dark red text
+        },
       })
     }
+
+    // Return false to ensure no further form processing
+    return false
   }
 
   return (
-    <div className="flex min-h-screen bg-[#0A0F1D] overflow-auto">
-      <div className="flex flex-col md:flex-row w-full">
+    <div className="flex min-h-screen bg-[#0A0F1D]  overflow-auto">
+      <div className="flex flex-col justify-center md:flex-row w-full ">
         {/* Left Side - Form */}
         <div className="w-full md:w-1/2 flex flex-col justify-center items-center md:items-end p-4 md:p-6 lg:p-8">
           <div className="w-full max-w-md lg:max-w-lg space-y-4 md:space-y-6">
@@ -78,7 +136,12 @@ export default function LoginPage() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-4 md:space-y-5"
+              noValidate // Disable browser's native form validation
+              autoComplete="off" // Disable autocomplete to prevent unwanted form submissions
+            >
               <div className="space-y-1 md:space-y-2">
                 <label htmlFor="email" className="block font-semibold text-white text-sm md:text-base">
                   Email Address
@@ -130,7 +193,8 @@ export default function LoginPage() {
               </div>
 
               <Button
-                type="submit"
+                type="button" // Changed from submit to button
+                onClick={handleSubmit} // Add onClick handler
                 className="w-full bg-[#F6BE00] hover:bg-yellow-600 text-black font-bold py-3 md:py-4 lg:py-5 rounded-md flex items-center justify-center"
                 disabled={mutation.isPending}
               >

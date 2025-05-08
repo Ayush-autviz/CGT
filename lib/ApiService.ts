@@ -11,7 +11,11 @@ const api = axios.create({
 // Utility function to handle navigation in non-component context
 const redirectToLogin = () => {
   if (typeof window !== 'undefined') {
-    window.location.href = '/auth/login'; // Client-side redirect
+    // Only redirect if we're not already on the login page
+    const currentPath = window.location.pathname;
+    if (!currentPath.includes('/auth/login')) {
+      window.location.href = '/auth/login'; // Client-side redirect
+    }
   }
 };
 
@@ -22,8 +26,12 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // Clear auth store using clearAuth
       useAuthStore.getState().clearAuth();
-      // Redirect to login page
-      redirectToLogin();
+
+      // Only redirect if it's not a login attempt
+      const isLoginAttempt = error.config?.url?.includes('api/auth/login');
+      if (!isLoginAttempt) {
+        redirectToLogin();
+      }
     }
     return Promise.reject(error);
   }
@@ -45,8 +53,34 @@ export const loginUser = async (credentials: { email: string; password: string }
   try {
     const response = await api.post('api/auth/login', credentials);
     return response.data;
-  } catch (error) {
-    throw error;
+  } catch (error: any) {
+    // Extract more meaningful error messages from the response if available
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      // Handle the specific error format: { "error": "Invalid email or password" }
+      let errorMessage = 'Invalid email or password. Please try again.';
+
+      if (error.response.data?.error) {
+        // This handles the format { "error": "message" }
+        errorMessage = error.response.data.error;
+      } else if (error.response.data?.message) {
+        // This handles the format { "message": "message" }
+        errorMessage = error.response.data.message;
+      }
+
+      // Log the full error response for debugging
+      console.log('Error response data:', error.response.data);
+
+      // Just throw the error message directly
+      throw new Error(errorMessage);
+    } else if (error.request) {
+      // The request was made but no response was received
+      throw new Error('No response from server. Please check your internet connection and try again.');
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      throw new Error(error.message || 'An unexpected error occurred. Please try again later.');
+    }
   }
 };
 
@@ -96,7 +130,7 @@ export const updateUserName = async (name: string) => {
     try {
       const token = useAuthStore.getState().token;
       if (!token) throw new Error('No token available');
-  
+
       const response = await api.put('api/auth/profile', { name });
       return response.data;
     } catch (error) {
@@ -202,4 +236,22 @@ export const changePassword = async ({oldPassword,newPassword}:{oldPassword: str
     } catch (error) {
       throw error;
     }
+};
+
+export const fetchCourses = async () => {
+  try {
+    const response = await api.get('api/courses');
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to fetch courses');
+  }
+};
+
+export const fetchCourseLectures = async (courseId: string) => {
+  try {
+    const response = await api.get(`api/courses/${courseId}/videos`);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to fetch lectures');
+  }
 };

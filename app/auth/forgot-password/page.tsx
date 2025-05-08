@@ -26,10 +26,34 @@ export default function ForgotPasswordPage() {
     },
     onError: (error: any) => {
       console.error("Password reset request failed:", error)
-      toast.error("Request Failed", {
-        description: error.message || "Unable to send reset link. Please try again.",
-        duration: 5000,
-      })
+      
+      // Extract error message from axios error response if available
+      let errorMessage = "Unable to send reset link. Please try again."
+      
+      // Log the full error for debugging
+      console.log("Full error object:", error)
+      
+      // Check for the specific error format { "error": "message" }
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+      
+      // Show error toast with custom styling
+      setTimeout(() => {
+        toast.error("Request Failed", {
+          description: errorMessage,
+          duration: 8000, // Increased duration to ensure visibility
+          style: {
+            background: '#FEE2E2', // Light red background
+            border: '1px solid #F87171', // Red border
+            color: '#B91C1C', // Dark red text
+          },
+        })
+      }, 100) // Small delay to ensure the toast is displayed after any potential state changes
     },
   })
 
@@ -40,7 +64,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="flex min-h-screen bg-[#0A0F1D] overflow-auto">
-      <div className="flex flex-col md:flex-row w-full">
+      <div className="flex flex-col justify-center md:flex-row w-full">
         {/* Left Side - Form */}
         <div className="w-full md:w-1/2 flex flex-col justify-center items-center md:items-end p-4 md:p-6 lg:p-8">
           <div className="w-full max-w-md lg:max-w-lg space-y-4 md:space-y-6">

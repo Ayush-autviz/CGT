@@ -92,7 +92,7 @@ export function Header() {
     <>
       {/* Add Toaster component to render toasts */}
       
-      <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-[#3C4A60] bg-[#0A0F1D] px-4">
+      <header  className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-[#3C4A60] bg-[#0A0F1D] px-4">
         <div className="flex items-center gap-2 md:hidden">
           <SidebarTrigger />
         </div>
