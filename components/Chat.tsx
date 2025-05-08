@@ -7,17 +7,15 @@ import { BotIcon as Robot } from "lucide-react"
 import Image from "next/image"
 import data from "@emoji-mart/data"
 import Picker from "@emoji-mart/react"
+import { toast } from "sonner"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useSessionStore } from "@/stores/sessionStore"
-import { createSession, createSessionMessage, getSessionMessages } from "@/lib/ApiService"
+import {  createSession, createSessionMessage, getSessionMessages } from "@/lib/ApiService"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog"
 import { ClipLoader } from "react-spinners"
-import ReactMarkdown from "react-markdown"
-import remarkGfm from "remark-gfm"
-import { toast } from "sonner"
 
 // Typing Indicator Component
 const TypingIndicator = () => (
@@ -40,8 +38,8 @@ interface Message {
   attachments?: File[]
   image?: string
 }
+const BASE_URL = "http://18.216.181.203:5000";
 
-const BASE_URL = "https://lwj8k3bb-5000.inc1.devtunnels.ms"
 
 export function ChatInterface() {
 
@@ -76,43 +74,6 @@ export function ChatInterface() {
       setActiveSessionId(data.id)
       setNewSessionTitle("")
       setIsDialogOpen(false)
-
-      // Show success toast
-      toast.success("Session Created", {
-        description: "New chat session created successfully.",
-        duration: 3000,
-      })
-    },
-    onError: (error: any) => {
-      console.error("Session creation failed:", error)
-
-      // Extract error message from axios error response if available
-      let errorMessage = "Failed to create session. Please try again."
-
-      // Log the full error for debugging
-      console.log("Full error object:", error)
-
-      // Check for the specific error format { "error": "message" }
-      if (error.response?.data?.error) {
-        errorMessage = error.response.data.error
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message
-      } else if (error.message) {
-        errorMessage = error.message
-      }
-
-      // Show error toast with custom styling
-      setTimeout(() => {
-        toast.error("Session Creation Failed", {
-          description: errorMessage,
-          duration: 8000, // Increased duration to ensure visibility
-          style: {
-            background: '#FEE2E2', // Light red background
-            border: '1px solid #F87171', // Red border
-            color: '#B91C1C', // Dark red text
-          },
-        })
-      }, 100) // Small delay to ensure the toast is displayed after any potential state changes
     },
   })
 
@@ -157,37 +118,8 @@ export function ChatInterface() {
       setIsTyping(false)
       //setTimeout(() => setIsTyping(false), 1000) // Adjust delay as needed
     },
-    onError: (error: any) => {
-      console.error("Error sending message:", error)
+    onError: () => {
       setIsTyping(false) // Hide typing indicator on error
-
-      // Extract error message from axios error response if available
-      let errorMessage = "Failed to send message. Please try again."
-
-      // Log the full error for debugging
-      console.log("Full error object:", error)
-
-      // Check for the specific error format { "error": "message" }
-      if (error.response?.data?.error) {
-        errorMessage = error.response.data.error
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message
-      } else if (error.message) {
-        errorMessage = error.message
-      }
-
-      // Show error toast with custom styling
-      setTimeout(() => {
-        toast.error("Message Failed", {
-          description: errorMessage,
-          duration: 8000, // Increased duration to ensure visibility
-          style: {
-            background: '#FEE2E2', // Light red background
-            border: '1px solid #F87171', // Red border
-            color: '#B91C1C', // Dark red text
-          },
-        })
-      }, 100) // Small delay to ensure the toast is displayed after any potential state changes
     },
   })
 
@@ -203,15 +135,7 @@ export function ChatInterface() {
     if (!input.trim() && attachments.length === 0) return
 
     if (!activeSessionId) {
-      toast.warning("No Active Session", {
-        description: "Please create or select a session first.",
-        duration: 5000,
-        style: {
-          background: '#FEF3C7', // Light yellow background
-          border: '1px solid #F59E0B', // Amber border
-          color: '#92400E', // Dark amber text
-        },
-      })
+      alert("Please create or select a session first")
       return
     }
 
@@ -240,7 +164,66 @@ export function ChatInterface() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setAttachments([e.target.files[0]])
+      const file = e.target.files[0];
+
+      // Only allow image or PDF files
+      if (file.type.indexOf('image/') !== -1 || file.type === 'application/pdf') {
+        // If there's already an attachment, replace it (only one file allowed)
+        if (attachments.length > 0) {
+          toast.info("Previous attachment replaced", {
+            description: "Only one file can be attached at a time",
+            duration: 3000,
+          });
+        } else {
+          toast.success("File attached", {
+            description: `${file.name} (${(file.size / 1024).toFixed(1)} KB)`,
+            duration: 3000,
+          });
+        }
+
+        // Only allow one file at a time
+        setAttachments([file]);
+      } else {
+        toast.error("Unsupported file type", {
+          description: "Only images and PDF files are supported",
+          duration: 3000,
+        });
+      }
+    }
+  }
+
+  // Handle clipboard paste events
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const { items } = e.clipboardData;
+
+    // Check if clipboard contains files
+    if (items) {
+      for (let i = 0; i < items.length; i++) {
+        // Only process image or PDF files
+        if (items[i].type.indexOf('image/') !== -1 || items[i].type === 'application/pdf') {
+          const file = items[i].getAsFile();
+          if (file) {
+            e.preventDefault(); // Prevent the default paste behavior
+
+            // If there's already an attachment, replace it (only one file allowed)
+            if (attachments.length > 0) {
+              toast.info("Previous attachment replaced", {
+                description: "Only one file can be attached at a time",
+                duration: 3000,
+              });
+            } else {
+              toast.success("File attached", {
+                description: `${file.name} (${(file.size / 1024).toFixed(1)} KB)`,
+                duration: 3000,
+              });
+            }
+
+            // Set the new attachment
+            setAttachments([file]);
+            return;
+          }
+        }
+      }
     }
   }
 
@@ -344,38 +327,9 @@ export function ChatInterface() {
                   message.role === "user"
                     ? "rounded-bl-[10px] bg-white text-black"
                     : "rounded-br-[10px] bg-[#1E293B] text-white"
-                } rounded-t-[10px] markdown-content`}
+                } rounded-t-[10px]`}
               >
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    // Style code blocks
-                    code: ({className, children, ...props}: any) => {
-                      const isInline = !className
-                      return isInline ? (
-                        <code className="bg-gray-200 text-gray-800 px-1 py-0.5 rounded text-sm" {...props}>
-                          {children}
-                        </code>
-                      ) : (
-                        <pre className="bg-gray-800 p-2 rounded text-sm overflow-x-auto">
-                          <code className={className} {...props}>
-                            {children}
-                          </code>
-                        </pre>
-                      )
-                    },
-                    // Style links
-                    a: ({children, ...props}: any) => {
-                      return (
-                        <a className="text-amber-500 hover:underline" {...props}>
-                          {children}
-                        </a>
-                      )
-                    }
-                  }}
-                >
-                  {message.content}
-                </ReactMarkdown>
+                {message.content}
                 {message.file_url && (
                   <div className="mt-2">
                     <Image
@@ -445,17 +399,70 @@ export function ChatInterface() {
       </div>
 
       {attachments.length > 0 && (
-        <div className="mb-2 rounded-lg bg-[#1E293B] p-2">
-          <div className="text-xs text-[#A4A4A4] mb-1">Attachment:</div>
+        <div className="mb-2 rounded-lg bg-[#1E293B] p-3">
+          <div className="text-xs text-[#A4A4A4] mb-2">Attachment:</div>
           <div className="flex flex-wrap gap-2">
-            <div className="relative rounded bg-[#2D3748] p-2 text-xs text-white">
-              <div className="flex items-center gap-2">
-                <span className="truncate max-w-[150px]">{attachments[0].name}</span>
+            <div className="relative rounded bg-[#2D3748] p-3 text-xs text-white">
+              <div className="flex items-center gap-3">
+                {/* Preview for image files */}
+                {attachments[0].type.startsWith('image/') && (
+                  <div className="h-12 w-12 rounded overflow-hidden">
+                    <Image
+                      src={URL.createObjectURL(attachments[0])}
+                      alt="Image preview"
+                      width={48}
+                      height={48}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                )}
+
+                {/* Icon for PDF files */}
+                {attachments[0].type === 'application/pdf' && (
+                  <div className="flex h-12 w-12 items-center justify-center rounded bg-red-100">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 text-red-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                  </div>
+                )}
+
+                <div className="flex flex-col">
+                  <span className="truncate max-w-[200px] font-medium">{attachments[0].name}</span>
+                  <span className="text-[#A4A4A4] text-xs mt-1">
+                    {(attachments[0].size / 1024).toFixed(1)} KB
+                  </span>
+                </div>
+
                 <button
                   onClick={removeAttachment}
-                  className="text-[#A4A4A4] hover:text-white"
+                  className="ml-2 rounded-full bg-[#3D4A60] p-1 text-[#A4A4A4] hover:text-white hover:bg-[#4D5A70]"
+                  title="Remove attachment"
                 >
-                  ×
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
                 </button>
               </div>
             </div>
@@ -469,7 +476,8 @@ export function ChatInterface() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type your message..."
+            onPaste={handlePaste}
+            placeholder="Type your message or paste an image/PDF..."
             className="rounded-full bg-[#1E293B] text-sm text-white pl-10 py-6 pr-16 placeholder:text-[#A4A4A4]"
             disabled={createMessageMutation.isPending}
           />

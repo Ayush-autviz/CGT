@@ -4,7 +4,7 @@ import type React from "react"
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, AlertCircle } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useMutation } from "@tanstack/react-query"
@@ -12,14 +12,17 @@ import { loginUser } from "@/lib/ApiService"
 import useAuthStore from "@/stores/authStore"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { loginSchema, type LoginFormData } from "@/lib/validationSchemas"
 
 export default function LoginPage() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
   })
+  const [errors, setErrors] = useState<Partial<Record<keyof LoginFormData, string>>>({})
+  const [authError, setAuthError] = useState<string | null>(null)
 
   const { setAuth } = useAuthStore()
 
@@ -33,61 +36,26 @@ export default function LoginPage() {
         description: "Welcome back! Redirecting to your dashboard...",
         duration: 3000,
       })
-      // Delay navigation to ensure toast is visible
-      setTimeout(() => {
-        router.push("/main")
-      }, 1000)
+      router.push("/main")
     },
     onError: (error: any) => {
       console.error("Login failed:", error)
-      // Extract error message from axios error response if available
-      let errorMessage = "Invalid email or password. Please try again."
 
-      // Log the full error for debugging
-      console.log("Full error object:", error)
+      // Extract error message from response
+      let errorMessage = "Invalid email or password. Please try again.";
 
-      // Check for the specific error format { "error": "Invalid email or password" }
       if (error.response?.data?.error) {
-        errorMessage = error.response.data.error
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message
+        errorMessage = error.response.data.error;
       } else if (error.message) {
-        errorMessage = error.message
+        errorMessage = error.message;
       }
 
-      // Ensure we're not in the middle of a page transition
-      setTimeout(() => {
-        // Show error toast with longer duration and custom styling
-        toast.error("Login Failed", {
-          description: errorMessage,
-          duration: 8000, // Increased duration to ensure visibility
-          style: {
-            background: '#FEE2E2', // Light red background
-            border: '1px solid #F87171', // Red border
-            color: '#B91C1C', // Dark red text
-          },
-        })
-      }, 100) // Small delay to ensure the toast is displayed after any potential state changes
-    },
-  })
+      // Set the auth error to display in the UI
+      setAuthError(errorMessage);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    // Prevent the default form submission behavior
-    e.preventDefault()
-    e.stopPropagation() // Also stop propagation to be extra safe
-
-    console.log("Form submission prevented")
-    console.log("Login data:", formData)
-
-    // Validate form data before submitting
-    if (!formData.email || !formData.password) {
-      toast.error("Missing Information", {
-        description: "Please enter both email and password.",
+      // Show error toast
+      toast.error("Login Failed", {
+        description: errorMessage,
         duration: 5000,
         style: {
           background: '#FEE2E2', // Light red background
@@ -95,32 +63,68 @@ export default function LoginPage() {
           color: '#B91C1C', // Dark red text
         },
       })
+    },
+  })
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name as keyof LoginFormData]: value }))
+
+    // Clear error for this field when user types
+    if (errors[name as keyof LoginFormData]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }))
+    }
+
+    // Clear auth error when user types
+    if (authError) {
+      setAuthError(null)
+    }
+  }
+
+  const validateForm = (): boolean => {
+    try {
+      loginSchema.parse(formData)
+      setErrors({})
+      return true
+    } catch (error: any) {
+      const formattedErrors: Partial<Record<keyof LoginFormData, string>> = {}
+
+      if (error.errors) {
+        error.errors.forEach((err: any) => {
+          const path = err.path[0] as keyof LoginFormData
+          formattedErrors[path] = err.message
+        })
+      }
+
+      setErrors(formattedErrors)
+      return false
+    }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    // Clear any previous auth error
+    setAuthError(null)
+
+    if (!validateForm()) {
+      // Form has validation errors
+      toast.error("Validation Error", {
+        description: "Please correct the errors in the form.",
+        duration: 5000,
+      })
       return
     }
 
-    // Use the mutation to handle the login
-    // The try-catch here only catches synchronous errors, not promise rejections
-    // The mutation's onError handler will catch API errors
     try {
-      // Disable any form submission while we're processing
-      if (!mutation.isPending) {
-        mutation.mutate(formData)
-      }
+      mutation.mutate(formData)
     } catch (error) {
       console.error("Unexpected error during mutation:", error)
       toast.error("An unexpected error occurred", {
         description: "Please try again later.",
-        duration: 8000,
-        style: {
-          background: '#FEE2E2', // Light red background
-          border: '1px solid #F87171', // Red border
-          color: '#B91C1C', // Dark red text
-        },
+        duration: 5000,
       })
     }
-
-    // Return false to ensure no further form processing
-    return false
   }
 
   return (
@@ -136,12 +140,17 @@ export default function LoginPage() {
               </p>
             </div>
 
-            <form
-              onSubmit={handleSubmit}
-              className="space-y-4 md:space-y-5"
-              noValidate // Disable browser's native form validation
-              autoComplete="off" // Disable autocomplete to prevent unwanted form submissions
-            >
+            {/* Display authentication error */}
+            {authError && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <div className="flex items-center">
+                  <AlertCircle className="h-5 w-5 mr-2" />
+                  <span className="block sm:inline">{authError}</span>
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
               <div className="space-y-1 md:space-y-2">
                 <label htmlFor="email" className="block font-semibold text-white text-sm md:text-base">
                   Email Address
@@ -153,9 +162,16 @@ export default function LoginPage() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Enter your email"
-                  className="bg-[#1E2634] rounded-[10px] px-4 md:px-8 py-3 md:py-4 border-[#323D50] text-white placeholder:text-gray-500"
-                  required
+                  className={`bg-[#1E2634] rounded-[10px] px-4 md:px-8 py-3 md:py-4 border-[#323D50] text-white placeholder:text-gray-500 ${
+                    errors.email ? "border-red-500 focus-visible:ring-red-500" : ""
+                  }`}
                 />
+                {errors.email && (
+                  <div className="flex items-center mt-1 text-red-500 text-xs">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    <span>{errors.email}</span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-1 md:space-y-2">
@@ -170,17 +186,24 @@ export default function LoginPage() {
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="••••••"
-                    className="bg-[#1E2634] rounded-[10px] px-4 md:px-8 py-3 md:py-4 border-[#323D50] text-white placeholder:text-gray-500 pr-10"
-                    required
+                    className={`bg-[#1E2634] rounded-[10px] px-4 md:px-8 py-3 md:py-4 border-[#323D50] text-white placeholder:text-gray-500 pr-10 ${
+                      errors.password ? "border-red-500 focus-visible:ring-red-500" : ""
+                    }`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 md:right-8 top-1/2 transform -translate-y-1/2 text-gray-400"
                   >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
                   </button>
                 </div>
+                {errors.password && (
+                  <div className="flex items-center mt-1 text-red-500 text-xs">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    <span>{errors.password}</span>
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-end">
@@ -193,8 +216,7 @@ export default function LoginPage() {
               </div>
 
               <Button
-                type="button" // Changed from submit to button
-                onClick={handleSubmit} // Add onClick handler
+                type="submit"
                 className="w-full bg-[#F6BE00] hover:bg-yellow-600 text-black font-bold py-3 md:py-4 lg:py-5 rounded-md flex items-center justify-center"
                 disabled={mutation.isPending}
               >

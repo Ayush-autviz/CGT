@@ -5,16 +5,19 @@ import { useRouter } from "next/navigation"
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { BASE_URL } from "@/lib/ApiService"
 
 export default function VerifyEmailPage({ params }: { params: any }) {
   const router = useRouter()
   const [verificationState, setVerificationState] = useState<"loading" | "success" | "error">("loading")
   const [errorMessage, setErrorMessage] = useState<string>("")
 
+
+
   useEffect(() => {
     const verifyEmail = async () => {
       try {
-        const response = await fetch(`https://lwj8k3bb-5000.inc1.devtunnels.ms/api/auth/verify/${params.token}`, {
+        const response = await fetch(`${BASE_URL}/api/auth/verify/${params.token}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

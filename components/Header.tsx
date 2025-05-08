@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
-import { LogOut, Search, User, Lock } from "lucide-react";
+import { LogOut, User, Lock, Eye, EyeOff } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast, Toaster } from "sonner"; // Import Sonner
+import { toast } from "sonner";
+import { createErrorToast } from "@/lib/errorUtils";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import useAuthStore from "@/stores/authStore";
 import { updateUserName, changePassword } from "@/lib/ApiService";
 
@@ -35,9 +36,23 @@ export function Header() {
   const [userName, setUserName] = useState(user?.name || "");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   const router = useRouter();
+  const pathname = usePathname();
   const queryClient = useQueryClient();
+
+  // Function to get the screen title based on the current path
+  const getScreenTitle = () => {
+    if (pathname === "/main") return "AI Chatbot";
+    if (pathname === "/main/courses") return "Digital Courses";
+    if (pathname === "/main/bookCoach") return "Book a Coach";
+    if (pathname.startsWith("/main/courses/")) return "Course Details";
+
+    // Default title if no match
+    return "Dashboard";
+  };
 
   // React Query mutation for updating the username
   const updateNameMutation = useMutation({
@@ -52,30 +67,9 @@ export function Header() {
       setIsProfileOpen(false);
       toast.success("Profile updated successfully!"); // Success toast
     },
-    onError: (error: any) => {
+    onError: (error) => {
       console.error("Error updating username:", error);
-
-      // Extract error message from response
-      let errorMessage = "Failed to update profile. Please try again.";
-
-      // Check for the specific error format { "error": "message" }
-      if (error.response?.data?.error) {
-        errorMessage = error.response.data.error;
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
-      toast.error("Profile Update Failed", {
-        description: errorMessage,
-        duration: 5000,
-        style: {
-          background: '#FEE2E2', // Light red background
-          border: '1px solid #F87171', // Red border
-          color: '#B91C1C', // Dark red text
-        },
-      });
+      toast.error("Profile Update Failed", createErrorToast("Profile Update Failed", error));
     },
   });
 
@@ -88,30 +82,9 @@ export function Header() {
       setIsPasswordOpen(false);
       toast.success("Password changed successfully!"); // Success toast
     },
-    onError: (error: any) => {
+    onError: (error) => {
       console.error("Error changing password:", error);
-
-      // Extract error message from response
-      let errorMessage = "Failed to change password. Please try again.";
-
-      // Check for the specific error format { "error": "message" }
-      if (error.response?.data?.error) {
-        errorMessage = error.response.data.error;
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
-      toast.error("Password Change Failed", {
-        description: errorMessage,
-        duration: 5000,
-        style: {
-          background: '#FEE2E2', // Light red background
-          border: '1px solid #F87171', // Red border
-          color: '#B91C1C', // Dark red text
-        },
-      });
+      toast.error("Password Change Failed", createErrorToast("Password Change Failed", error));
     },
   });
 
@@ -138,13 +111,8 @@ export function Header() {
         <div className="flex items-center gap-2 md:hidden">
           <SidebarTrigger />
         </div>
-        <div className="flex w-full max-w-md font-semibold items-center rounded-full text-white bg-[#334155] px-3 py-1">
-          <Search className="h-5 w-5 text-white" />
-          <Input
-            type="search"
-            placeholder="Search..."
-            className="border-0 bg-transparent placeholder:text-white text-white text-sm font-semibold focus-visible:ring-0 focus-visible:ring-offset-0"
-          />
+        <div className="flex items-center">
+          <h1 className="text-white text-lg font-semibold">{getScreenTitle()}</h1>
         </div>
         <div className="flex items-center gap-4">
           {/* <Button
@@ -232,25 +200,43 @@ export function Header() {
           <div className="grid gap-4 py-4">
             <div className="grid gap-2 text-white">
               <Label htmlFor="oldPassword">Old Password</Label>
-              <Input
-                id="oldPassword"
-                type="password"
-                value={oldPassword}
-                onChange={(e) => setOldPassword(e.target.value)}
-                className="col-span-3"
-                disabled={changePasswordMutation.isPending}
-              />
+              <div className="relative">
+                <Input
+                  id="oldPassword"
+                  type={showOldPassword ? "text" : "password"}
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                  className="col-span-3 pr-10"
+                  disabled={changePasswordMutation.isPending}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowOldPassword(!showOldPassword)}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"
+                >
+                  {showOldPassword ? <Eye size={16} /> : <EyeOff size={16} />}
+                </button>
+              </div>
             </div>
             <div className="grid gap-2 text-white">
               <Label htmlFor="newPassword">New Password</Label>
-              <Input
-                id="newPassword"
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="col-span-3"
-                disabled={changePasswordMutation.isPending}
-              />
+              <div className="relative">
+                <Input
+                  id="newPassword"
+                  type={showNewPassword ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="col-span-3 pr-10"
+                  disabled={changePasswordMutation.isPending}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"
+                >
+                  {showNewPassword ? <Eye size={16} /> : <EyeOff size={16} />}
+                </button>
+              </div>
             </div>
           </div>
           <DialogFooter>

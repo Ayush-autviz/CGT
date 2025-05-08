@@ -32,27 +32,9 @@ export default function ResetPasswordPage({ params }: { params: any }) {
     },
     onError: (error: any) => {
       console.error("Password reset failed:", error)
-
-      // Extract error message from response
-      let errorMessage = "Unable to reset password. Please try again.";
-
-      // Check for the specific error format { "error": "message" }
-      if (error.response?.data?.error) {
-        errorMessage = error.response.data.error;
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
       toast.error("Password Reset Failed", {
-        description: errorMessage,
-        duration: 8000, // Increased duration to ensure visibility
-        style: {
-          background: '#FEE2E2', // Light red background
-          border: '1px solid #F87171', // Red border
-          color: '#B91C1C', // Dark red text
-        },
+        description: error.message || "Unable to reset password. Please try again.",
+        duration: 5000,
       })
     },
   })
@@ -118,7 +100,7 @@ export default function ResetPasswordPage({ params }: { params: any }) {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 md:right-8 top-1/2 transform -translate-y-1/2 text-gray-400"
                   >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
                   </button>
                 </div>
               </div>
@@ -143,7 +125,7 @@ export default function ResetPasswordPage({ params }: { params: any }) {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-4 md:right-8 top-1/2 transform -translate-y-1/2 text-gray-400"
                   >
-                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    {showConfirmPassword ? <Eye size={16} /> : <EyeOff size={16} />}
                   </button>
                 </div>
               </div>

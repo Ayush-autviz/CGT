@@ -4,7 +4,7 @@ import type React from "react"
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, AlertCircle } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -12,16 +12,18 @@ import { useMutation } from "@tanstack/react-query"
 import { signUpUser } from "@/lib/ApiService"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { signUpSchema, type SignUpFormData } from "@/lib/validationSchemas"
 
 export default function SignUpPage() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<SignUpFormData>({
     name: "",
     email: "",
     password: "",
     agreeTerms: false,
   })
+  const [errors, setErrors] = useState<Partial<Record<keyof SignUpFormData, string>>>({})
 
   const mutation = useMutation({
     mutationFn: signUpUser,
@@ -36,61 +38,65 @@ export default function SignUpPage() {
     },
     onError: (error: any) => {
       console.error("Sign up failed:", error)
-
-      // Extract error message from axios error response if available
-      let errorMessage = "Something went wrong. Please try again."
-
-      // Log the full error for debugging
-      console.log("Full error object:", error)
-
-      // Check for the specific error format { "error": "message" }
-      if (error.response?.data?.error) {
-        errorMessage = error.response.data.error
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message
-      } else if (error.message) {
-        errorMessage = error.message
-      }
-
-      // Show error toast with custom styling
-      setTimeout(() => {
-        toast.error("Sign Up Failed", {
-          description: errorMessage,
-          duration: 8000, // Increased duration to ensure visibility
-          style: {
-            background: '#FEE2E2', // Light red background
-            border: '1px solid #F87171', // Red border
-            color: '#B91C1C', // Dark red text
-          },
-        })
-      }, 100) // Small delay to ensure the toast is displayed after any potential state changes
+      // Show error toast
+      toast.error("Sign Up Failed", {
+        description: error.message || "Something went wrong. Please try again.",
+        duration: 5000,
+      })
     },
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    setFormData((prev) => ({ ...prev, [name as keyof SignUpFormData]: value }))
+
+    // Clear error for this field when user types
+    if (errors[name as keyof SignUpFormData]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }))
+    }
   }
 
   const handleCheckboxChange = (checked: boolean) => {
     setFormData((prev) => ({ ...prev, agreeTerms: checked }))
+
+    // Clear error for this field when user changes it
+    if (errors.agreeTerms) {
+      setErrors(prev => ({ ...prev, agreeTerms: undefined }))
+    }
+  }
+
+  const validateForm = (): boolean => {
+    try {
+      signUpSchema.parse(formData)
+      setErrors({})
+      return true
+    } catch (error: any) {
+      const formattedErrors: Partial<Record<keyof SignUpFormData, string>> = {}
+
+      if (error.errors) {
+        error.errors.forEach((err: any) => {
+          const path = err.path[0] as keyof SignUpFormData
+          formattedErrors[path] = err.message
+        })
+      }
+
+      setErrors(formattedErrors)
+      return false
+    }
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.agreeTerms) {
-      // Show warning toast if terms are not agreed
-      toast.warning("Terms Not Accepted", {
-        description: "You must agree to the Terms and Conditions to sign up.",
+
+    if (!validateForm()) {
+      // Form has validation errors
+      toast.error("Validation Error", {
+        description: "Please correct the errors in the form.",
         duration: 5000,
-        style: {
-          background: '#FEF3C7', // Light yellow background
-          border: '1px solid #F59E0B', // Amber border
-          color: '#92400E', // Dark amber text
-        },
       })
       return
     }
+
     console.log("Sign up data:", formData)
     mutation.mutate(formData)
   }
@@ -120,9 +126,16 @@ export default function SignUpPage() {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Enter your full name"
-                  className="bg-[#1E2634] rounded-[10px] px-4 md:px-8 py-3 md:py-4 border-[#323D50] text-white placeholder:text-gray-500"
-                  required
+                  className={`bg-[#1E2634] rounded-[10px] px-4 md:px-8 py-3 md:py-4 border-[#323D50] text-white placeholder:text-gray-500 ${
+                    errors.name ? "border-red-500 focus-visible:ring-red-500" : ""
+                  }`}
                 />
+                {errors.name && (
+                  <div className="flex items-center mt-1 text-red-500 text-xs">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    <span>{errors.name}</span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-1 md:space-y-2">
@@ -136,9 +149,16 @@ export default function SignUpPage() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Enter your email"
-                  className="bg-[#1E2634] rounded-[10px] px-4 md:px-8 py-3 md:py-4 border-[#323D50] text-white placeholder:text-gray-500"
-                  required
+                  className={`bg-[#1E2634] rounded-[10px] px-4 md:px-8 py-3 md:py-4 border-[#323D50] text-white placeholder:text-gray-500 ${
+                    errors.email ? "border-red-500 focus-visible:ring-red-500" : ""
+                  }`}
                 />
+                {errors.email && (
+                  <div className="flex items-center mt-1 text-red-500 text-xs">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    <span>{errors.email}</span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-1 md:space-y-2">
@@ -153,32 +173,51 @@ export default function SignUpPage() {
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="••••••"
-                    className="bg-[#1E2634] rounded-[10px] px-4 md:px-8 py-3 md:py-4 border-[#323D50] text-white placeholder:text-gray-500 pr-10"
-                    required
+                    className={`bg-[#1E2634] rounded-[10px] px-4 md:px-8 py-3 md:py-4 border-[#323D50] text-white placeholder:text-gray-500 pr-10 ${
+                      errors.password ? "border-red-500 focus-visible:ring-red-500" : ""
+                    }`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 md:right-8 top-1/2 transform -translate-y-1/2 text-gray-400"
                   >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
                   </button>
                 </div>
+                {errors.password && (
+                  <div className="flex items-center mt-1 text-red-500 text-xs">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    <span>{errors.password}</span>
+                  </div>
+                )}
               </div>
 
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="terms"
-                  checked={formData.agreeTerms}
-                  onCheckedChange={handleCheckboxChange}
-                  className="border-gray-600 data-[state=checked]:bg-yellow-500 data-[state=checked]:border-yellow-500"
-                />
-                <label htmlFor="terms" className="text-xs md:text-sm font-semibold text-[#A6A6A6]">
-                  I agree with{" "}
-                  <Link href="/terms" className="text-[#F6BE00] hover:underline">
-                    Terms and Conditions
-                  </Link>
-                </label>
+              <div className="flex items-start space-x-2">
+                <div className="mt-1">
+                  <Checkbox
+                    id="terms"
+                    checked={formData.agreeTerms}
+                    onCheckedChange={handleCheckboxChange}
+                    className={`border-gray-600 data-[state=checked]:bg-yellow-500 data-[state=checked]:border-yellow-500 ${
+                      errors.agreeTerms ? "border-red-500" : ""
+                    }`}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="terms" className="text-xs md:text-sm font-semibold text-[#A6A6A6]">
+                    I agree with{" "}
+                    <Link href="/terms" className="text-[#F6BE00] hover:underline">
+                      Terms and Conditions
+                    </Link>
+                  </label>
+                  {errors.agreeTerms && (
+                    <div className="flex items-center mt-1 text-red-500 text-xs">
+                      <AlertCircle className="h-3 w-3 mr-1" />
+                      <span>{errors.agreeTerms}</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <Button

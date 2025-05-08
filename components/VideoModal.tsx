@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { X, Loader2, AlertCircle, RefreshCw } from "lucide-react"
-import Image from "next/image"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -13,10 +12,9 @@ interface VideoModalProps {
   onClose: () => void
   streamUrl: string
   title: string
-  thumbnailUrl?: string
 }
 
-export function VideoModal({ isOpen, onClose, streamUrl, title, thumbnailUrl }: VideoModalProps) {
+export function VideoModal({ isOpen, onClose, streamUrl, title }: VideoModalProps) {
   const [videoSrc, setVideoSrc] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -82,30 +80,14 @@ export function VideoModal({ isOpen, onClose, streamUrl, title, thumbnailUrl }: 
 
             <div className="relative rounded-xl overflow-hidden bg-black/40 shadow-inner">
               {isLoading && (
-                <div className="flex flex-col items-center justify-center h-[450px] bg-[#0F1623]/80 relative">
-                  {thumbnailUrl ? (
-                    <div className="relative w-full h-full">
-                      <Image
-                        src={thumbnailUrl}
-                        alt={title}
-                        fill
-                        className="object-cover opacity-50"
-                        onError={() => console.error("Failed to load thumbnail")}
-                      />
-                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40">
-                        <Loader2 className="h-10 w-10 text-[#F6BE00] animate-spin mb-4" />
-                        <p className="text-white/80 text-sm text-center">Loading video content...</p>
-                      </div>
+                <div className="flex flex-col items-center justify-center h-[450px] bg-[#0F1623]/80">
+                  <div className="space-y-6">
+                    <Skeleton className="h-[300px] w-[500px] bg-[#334155]" />
+                    <div className="flex justify-center">
+                      <Loader2 className="h-10 w-10 text-[#F6BE00] animate-spin" />
                     </div>
-                  ) : (
-                    <div className="space-y-6">
-                      <Skeleton className="h-[300px] w-[500px] bg-[#334155]" />
-                      <div className="flex justify-center">
-                        <Loader2 className="h-10 w-10 text-[#F6BE00] animate-spin" />
-                      </div>
-                      <p className="text-white/80 text-sm text-center">Loading video content...</p>
-                    </div>
-                  )}
+                    <p className="text-white/80 text-sm text-center">Loading video content...</p>
+                  </div>
                 </div>
               )}
 
