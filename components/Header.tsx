@@ -105,7 +105,7 @@ export function Header() {
           />
         </div>
         <div className="flex items-center gap-4">
-          <Button
+          {/* <Button
             variant="default"
             size="sm"
             className="hidden bg-[#F6BE00] text-black rounded-[10px] gap-2 hover:bg-[#F6BE00] md:flex"
@@ -119,7 +119,7 @@ export function Header() {
             className="text-muted-foreground hover:bg-transparent border rounded-full border-[#5C5C5C]"
           >
             <Image src="/bell.svg" alt="phone" width={16} height={16} />
-          </Button>
+          </Button> */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Avatar className="h-8 w-8 cursor-pointer">

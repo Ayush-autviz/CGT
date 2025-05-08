@@ -3,8 +3,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { CourseCard } from "@/components/course-card"
 import { fetchCourses } from "@/lib/ApiService"
-import { useCourse } from "@/context/coursecontext"
-import { CourseSidebar } from "@/components/courseSidebar"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function DigitalCoursesPage() {
@@ -13,11 +11,9 @@ export default function DigitalCoursesPage() {
     queryFn: fetchCourses,
   })
 
-  const { setSelectedCourseId, selectedCourseId } = useCourse()
-
   return (
-    <div className="flex bg-[#0A0F1D] min-h-screen">
-      <div className="flex-1 p-6 overflow-y-auto" style={{ marginRight: "320px" }}>
+    <div className="bg-[#0A0F1D] min-h-screen">
+      <div className="p-6 overflow-y-auto">
         <div className="mb-8">
           <h1 className="text-2xl text-white font-bold mb-2">Digital Courses</h1>
           <p className="text-sm text-[#A4A4A4]">Structured on-demand learning to sharpen your edge.</p>
@@ -48,34 +44,21 @@ export default function DigitalCoursesPage() {
                     </div>
                   </div>
                 ))
-            : courses.map((course) => {
-                const isSelected = selectedCourseId === course.id.toString()
-
-                return (
-                  <div
-                    key={course.id}
-                    onClick={() => setSelectedCourseId(course.id.toString())}
-                    className={`rounded-2xl cursor-pointer transition-all duration-300 transform ${
-                      isSelected
-                        ? "border-2 border-[#F6BE00] scale-[1.02] shadow-lg shadow-[#F6BE00]/20"
-                        : "border border-transparent hover:scale-[1.01]"
-                    }`}
-                  >
-                    <CourseCard
-                      id={course.id}
-                      title={course.title}
-                      image={course.thumbnail_url || "/placeholder.svg?height=200&width=400"}
-                      instructor={{ name: "Instructor", avatar: "/placeholder.svg?height=40&width=40" }}
-                      count={course.video_count}
-                      progress={0}
-                      action="Start Course"
-                    />
-                  </div>
-                )
-              })}
+            : courses.map((course: any) => (
+                <div key={course.id} className="rounded-2xl overflow-hidden">
+                  <CourseCard
+                    id={course.id}
+                    title={course.title}
+                    image={course.thumbnail_url || "/placeholder.svg?height=200&width=400"}
+                    instructor={{ name: "Instructor", avatar: "/placeholder.svg?height=40&width=40" }}
+                    count={course.video_count}
+                    progress={0}
+                    action="View Course"
+                  />
+                </div>
+              ))}
         </div>
       </div>
-      <CourseSidebar />
     </div>
   )
 }
