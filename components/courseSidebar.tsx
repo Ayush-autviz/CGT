@@ -52,9 +52,14 @@ export function CourseSidebar() {
   }
 
   const handleVideoError = (lectureId: number) => {
-    toast.error("Failed to load video thumbnail", {
-      description: "Using placeholder image instead",
-      duration: 3000,
+    toast.error("Thumbnail Error", {
+      description: "Failed to load video thumbnail. Using placeholder image instead.",
+      duration: 5000,
+      style: {
+        background: '#FEE2E2', // Light red background
+        border: '1px solid #F87171', // Red border
+        color: '#B91C1C', // Dark red text
+      },
     })
   }
 

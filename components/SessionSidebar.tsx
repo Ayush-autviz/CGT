@@ -50,8 +50,30 @@ export function SessionSidebar() {
       setIsDialogOpen(false)
       toast.success("Session created successfully!") // Success toast
     },
-    onError: (error) => {
-      toast.error("Failed to create session. Please try again.") // Error toast
+    onError: (error: any) => {
+      console.error("Session creation failed:", error);
+
+      // Extract error message from response
+      let errorMessage = "Failed to create session. Please try again.";
+
+      // Check for the specific error format { "error": "message" }
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      toast.error("Session Creation Failed", {
+        description: errorMessage,
+        duration: 5000,
+        style: {
+          background: '#FEE2E2', // Light red background
+          border: '1px solid #F87171', // Red border
+          color: '#B91C1C', // Dark red text
+        },
+      });
     },
   })
 
@@ -72,8 +94,30 @@ export function SessionSidebar() {
       // }
       toast.success("Session deleted successfully!") // Success toast
     },
-    onError: (error) => {
-      toast.error("Failed to delete session. Please try again.") // Error toast
+    onError: (error: any) => {
+      console.error("Session deletion failed:", error);
+
+      // Extract error message from response
+      let errorMessage = "Failed to delete session. Please try again.";
+
+      // Check for the specific error format { "error": "message" }
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      toast.error("Session Deletion Failed", {
+        description: errorMessage,
+        duration: 5000,
+        style: {
+          background: '#FEE2E2', // Light red background
+          border: '1px solid #F87171', // Red border
+          color: '#B91C1C', // Dark red text
+        },
+      });
     },
   })
 

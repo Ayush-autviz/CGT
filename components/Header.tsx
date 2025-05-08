@@ -52,9 +52,30 @@ export function Header() {
       setIsProfileOpen(false);
       toast.success("Profile updated successfully!"); // Success toast
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("Error updating username:", error);
-      toast.error("Failed to update profile. Please try again."); // Error toast
+
+      // Extract error message from response
+      let errorMessage = "Failed to update profile. Please try again.";
+
+      // Check for the specific error format { "error": "message" }
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      toast.error("Profile Update Failed", {
+        description: errorMessage,
+        duration: 5000,
+        style: {
+          background: '#FEE2E2', // Light red background
+          border: '1px solid #F87171', // Red border
+          color: '#B91C1C', // Dark red text
+        },
+      });
     },
   });
 
@@ -67,9 +88,30 @@ export function Header() {
       setIsPasswordOpen(false);
       toast.success("Password changed successfully!"); // Success toast
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("Error changing password:", error);
-      toast.error("Failed to change password. Please try again."); // Error toast
+
+      // Extract error message from response
+      let errorMessage = "Failed to change password. Please try again.";
+
+      // Check for the specific error format { "error": "message" }
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      toast.error("Password Change Failed", {
+        description: errorMessage,
+        duration: 5000,
+        style: {
+          background: '#FEE2E2', // Light red background
+          border: '1px solid #F87171', // Red border
+          color: '#B91C1C', // Dark red text
+        },
+      });
     },
   });
 
@@ -91,7 +133,7 @@ export function Header() {
   return (
     <>
       {/* Add Toaster component to render toasts */}
-      
+
       <header  className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-[#3C4A60] bg-[#0A0F1D] px-4">
         <div className="flex items-center gap-2 md:hidden">
           <SidebarTrigger />

@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { useParams, useRouter } from "next/navigation"
-import { ArrowLeft, FileVideo } from "lucide-react"
+import { ArrowLeft, FileVideo, Play } from "lucide-react"
 import Image from "next/image"
 
 import { fetchCourseLectures } from "@/lib/ApiService"
@@ -26,7 +26,7 @@ export default function CourseVideosPage() {
   const params = useParams()
   const router = useRouter()
   const courseId = params.courseId as string
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedVideo, setSelectedVideo] = useState<{
     streamUrl: string
@@ -64,9 +64,14 @@ export default function CourseVideosPage() {
   }
 
   const handleThumbnailError = () => {
-    toast.error("Failed to load thumbnail", {
-      description: "Using placeholder image instead",
-      duration: 3000,
+    toast.error("Thumbnail Error", {
+      description: "Failed to load thumbnail. Using placeholder image instead.",
+      duration: 5000,
+      style: {
+        background: '#FEE2E2', // Light red background
+        border: '1px solid #F87171', // Red border
+        color: '#B91C1C', // Dark red text
+      },
     })
   }
 
@@ -105,14 +110,14 @@ export default function CourseVideosPage() {
   return (
     <div className="p-6 bg-[#0A0F1D] min-h-screen">
       <div className="mb-8">
-        <Button 
-          onClick={handleBackClick} 
-          variant="ghost" 
+        <Button
+          onClick={handleBackClick}
+          variant="ghost"
           className="mb-4 text-[#A4A4A4] hover:text-white hover:bg-[#1E293B]"
         >
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to Courses
         </Button>
-        
+
         <h1 className="text-2xl text-white font-bold mb-2">{courseTitle}</h1>
         <div className="flex items-center text-sm text-[#A4A4A4]">
           <FileVideo className="h-4 w-4 text-[#F6BE00] mr-2" />
@@ -146,20 +151,10 @@ export default function CourseVideosPage() {
                     <FileVideo className="h-12 w-12 text-[#F6BE00]/40" />
                   </div>
                 )}
+                {/* Dark overlay with play button on hover */}
                 <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <div className="bg-[#F6BE00] rounded-full p-3 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 hover:bg-yellow-400">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="w-6 h-6 text-[#1a2235]"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                  <div className="bg-[#F6BE00] rounded-full p-3 transform translate-y-8 group-hover:translate-y-0 transition-transform duration-300 hover:bg-yellow-400">
+                    <Play className="h-6 w-6 text-[#1a2235]" fill="currentColor" />
                   </div>
                 </div>
               </div>
