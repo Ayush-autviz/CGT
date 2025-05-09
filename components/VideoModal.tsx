@@ -7,14 +7,15 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import useAuthStore from "@/stores/authStore"
 
-interface VideoModalProps {
+export interface VideoModalProps {
   isOpen: boolean
   onClose: () => void
   streamUrl: string
   title: string
+  thumbnailUrl?: string
 }
 
-export function VideoModal({ isOpen, onClose, streamUrl, title }: VideoModalProps) {
+export function VideoModal({ isOpen, onClose, streamUrl, title, thumbnailUrl }: VideoModalProps) {
   const [videoSrc, setVideoSrc] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -81,11 +82,26 @@ export function VideoModal({ isOpen, onClose, streamUrl, title }: VideoModalProp
             <div className="relative rounded-xl overflow-hidden bg-black/40 shadow-inner">
               {isLoading && (
                 <div className="flex flex-col items-center justify-center h-[450px] bg-[#0F1623]/80">
-                  <div className="space-y-6">
-                    <Skeleton className="h-[300px] w-[500px] bg-[#334155]" />
-                    <div className="flex justify-center">
-                      <Loader2 className="h-10 w-10 text-[#F6BE00] animate-spin" />
-                    </div>
+                  <div className="space-y-6 relative w-full">
+                    {thumbnailUrl ? (
+                      <div className="relative h-[300px] w-full max-w-[500px] mx-auto">
+                        <img
+                          src={thumbnailUrl}
+                          alt={title}
+                          className="h-full w-full object-cover rounded-lg opacity-50"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Loader2 className="h-10 w-10 text-[#F6BE00] animate-spin" />
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <Skeleton className="h-[300px] w-[500px] bg-[#334155] mx-auto" />
+                        <div className="flex justify-center">
+                          <Loader2 className="h-10 w-10 text-[#F6BE00] animate-spin" />
+                        </div>
+                      </>
+                    )}
                     <p className="text-white/80 text-sm text-center">Loading video content...</p>
                   </div>
                 </div>

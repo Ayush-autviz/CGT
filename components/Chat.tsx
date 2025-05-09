@@ -11,12 +11,13 @@ import { toast } from "sonner"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useSessionStore } from "@/stores/sessionStore"
 import {  createSession, createSessionMessage, getSessionMessages } from "@/lib/ApiService"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog"
 import { ClipLoader } from "react-spinners"
+import { Textarea } from "./ui/textarea"
 
 // Typing Indicator Component
 const TypingIndicator = () => (

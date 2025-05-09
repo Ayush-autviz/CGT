@@ -3,7 +3,7 @@ import axios from 'axios';
 
 //export const BASE_URL = "http://18.216.181.203:5000/";
 
-export const BASE_URL = "https://lwj8k3bb-5000.inc1.devtunnels.ms/";
+export const BASE_URL = "http://18.216.181.203:5000/";
 
 
 
