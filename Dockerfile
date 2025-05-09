@@ -1,47 +1,23 @@
-FROM node:20-alpine AS base
+# Use the official Node.js image as the base image
+FROM node:20-alpine
 
-# Install dependencies only when needed
-FROM base AS deps
+# Set working directory inside the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package.json package-lock.json* ./
+# Copy package.json and package-lock.json first (for better caching)
+COPY package*.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm install --force
 
-# Rebuild the source code only when needed
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# Copy the rest of the application code
 COPY . .
 
-# Build the Next.js application
+# Build the Next.js app
 RUN npm run build
 
-# Production image, copy all the files and run next
-FROM base AS runner
-WORKDIR /app
-
-ENV NODE_ENV production
-
-# Create a non-root user to run the application
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-# Copy necessary files from the builder stage
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-
-# Set the correct permissions
-RUN chown -R nextjs:nodejs /app
-
-# Switch to the non-root user
-USER nextjs
-
-# Expose the port the app runs on
+# Expose the port Next.js runs on
 EXPOSE 3000
 
-# Set the command to run the app
-CMD ["node", "server.js"]
+# Start the Next.js app
+CMD ["npm", "start"]
