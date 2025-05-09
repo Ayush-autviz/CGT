@@ -11,6 +11,7 @@ import { toast } from "sonner"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useSessionStore } from "@/stores/sessionStore"
 import {  createSession, createSessionMessage, getSessionMessages } from "@/lib/ApiService"
@@ -51,6 +52,7 @@ export function ChatInterface() {
   const [isTyping, setIsTyping] = React.useState(false) // State for typing indicator
   const fileInputRef = React.useRef<HTMLInputElement>(null)
   const messagesEndRef = React.useRef<HTMLDivElement>(null)
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null)
   const [newSessionTitle, setNewSessionTitle] = React.useState("")
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
 
@@ -131,6 +133,14 @@ export function ChatInterface() {
     scrollToBottom()
   }, [messages, isTyping])
 
+  // Auto-resize textarea when input changes
+  React.useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+    }
+  }, [input])
+
   const handleSendMessage = async () => {
     if (!input.trim() && attachments.length === 0) return
 
@@ -160,6 +170,11 @@ export function ChatInterface() {
       e.preventDefault()
       handleSendMessage()
     }
+
+    // Auto-resize the textarea based on content
+    const textarea = e.target as HTMLTextAreaElement;
+    textarea.style.height = 'auto';
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -306,7 +321,7 @@ export function ChatInterface() {
         </p>
       </div>
 
-      <div className="flex-1 space-y-4 overflow-y-auto pb-4">
+      <div className="flex-1 space-y-4 overflow-y-auto pb-4 custom-scrollbar">
         {messages.map((message: any) => (
           <div
             key={message.id}
@@ -327,7 +342,7 @@ export function ChatInterface() {
                   message.role === "user"
                     ? "rounded-bl-[10px] bg-white text-black"
                     : "rounded-br-[10px] bg-[#1E293B] text-white"
-                } rounded-t-[10px]`}
+                } rounded-t-[10px] break-words whitespace-pre-wrap`}
               >
                 {message.content}
                 {message.file_url && (
@@ -472,22 +487,28 @@ export function ChatInterface() {
 
       <div className="mt-auto">
         <div className="relative">
-          <Input
+          <Textarea
+            ref={textareaRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             onPaste={handlePaste}
             placeholder="Type your message or paste an image/PDF..."
-            className="rounded-full bg-[#1E293B] text-sm text-white pl-10 py-6 pr-16 placeholder:text-[#A4A4A4]"
+            className="rounded-xl bg-[#1E293B] text-sm text-white pl-10 py-3 pr-24 placeholder:text-[#A4A4A4] min-h-[40px] max-h-[200px] resize-none"
             disabled={createMessageMutation.isPending}
+            rows={1}
+            style={{
+              overflow: 'auto',
+              lineHeight: '1.5'
+            }}
           />
-          <div className="absolute left-3 top-1/2 -translate-y-1/2">
+          <div className="absolute left-3 top-6 -translate-y-1/2">
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-6 w-6 mt-1 text-muted-foreground hover:bg-transparent"
+                  className="h-6 w-6 mt-1 text-muted-foreground hover:bg-transparent cursor-pointer"
                 >
                   <Image src="/emoji.svg" width={20} height={20} alt="Emoji" />
                 </Button>
@@ -497,11 +518,11 @@ export function ChatInterface() {
               </PopoverContent>
             </Popover>
           </div>
-          <div className="absolute right-12 top-1/2 -translate-y-1/2">
+          <div className="absolute right-14 top-6 -translate-y-1/2">
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 mt-1 text-muted-foreground hover:bg-transparent"
+              className="h-6 w-6 mt-1 text-muted-foreground hover:bg-transparent cursor-pointer"
               onClick={handleAttachClick}
             >
               <Image src="/Attach.svg" width={20} height={20} alt="Attach" />
@@ -513,12 +534,12 @@ export function ChatInterface() {
               className="hidden"
             />
           </div>
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+          <div className="absolute right-4 top-6 -translate-y-1/2">
             <Button
               onClick={handleSendMessage}
               variant="ghost"
               size="icon"
-              className="h-6 w-6 mt-1 text-amber-500 hover:bg-transparent"
+              className="h-6 w-6 mt-1 text-amber-500 hover:bg-transparent cursor-pointer"
               disabled={createMessageMutation.isPending}
             >
               <Image src="/Send.svg" width={20} height={20} alt="Send" />

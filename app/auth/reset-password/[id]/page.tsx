@@ -11,13 +11,21 @@ import { useMutation } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { resetPassword } from "@/lib/ApiService"
 import { toast } from "sonner"
+import { resetPasswordSchema, type ResetPasswordFormData } from "@/lib/validationSchemas"
 
 export default function ResetPasswordPage({ params }: { params: any }) {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ResetPasswordFormData>({
     password: "",
     confirmPassword: "",
+  })
+  const [passwordStrength, setPasswordStrength] = useState({
+    score: 0,
+    hasMinLength: false,
+    hasUppercase: false,
+    hasLowercase: false,
+    hasNumber: false
   })
   const router = useRouter()
 
@@ -42,28 +50,53 @@ export default function ResetPasswordPage({ params }: { params: any }) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+
+    // Update password strength if password field is changed
+    if (name === 'password') {
+      const hasMinLength = value.length >= 8
+      const hasUppercase = /[A-Z]/.test(value)
+      const hasLowercase = /[a-z]/.test(value)
+      const hasNumber = /[0-9]/.test(value)
+
+      // Calculate score (0-4)
+      const score = [hasMinLength, hasUppercase, hasLowercase, hasNumber].filter(Boolean).length
+
+      setPasswordStrength({
+        score,
+        hasMinLength,
+        hasUppercase,
+        hasLowercase,
+        hasNumber
+      })
+    }
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (formData.password.length < 8) {
-      toast.error("Invalid Password", {
-        description: "Password must be at least 8 characters long.",
+    try {
+      // Validate form using the schema
+      const result = resetPasswordSchema.safeParse(formData);
+
+      if (!result.success) {
+        // Extract and display validation errors
+        const errorMessages = result.error.errors.map(err => err.message).join(", ");
+        toast.error("Validation Error", {
+          description: errorMessages,
+          duration: 5000,
+        });
+        return;
+      }
+
+      // If validation passes, submit the form
+      mutation.mutate({ password: formData.password, token: params.id })
+    } catch (error) {
+      console.error("Unexpected error during validation:", error)
+      toast.error("An unexpected error occurred", {
+        description: "Please try again later.",
         duration: 5000,
       })
-      return
     }
-
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords Do Not Match", {
-        description: "Please ensure both passwords are identical.",
-        duration: 5000,
-      })
-      return
-    }
-
-    mutation.mutate({ password: formData.password, token: params.id })
   }
 
   return (
@@ -103,6 +136,50 @@ export default function ResetPasswordPage({ params }: { params: any }) {
                     {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
                   </button>
                 </div>
+
+                {/* Password strength indicator */}
+                <div className="mt-2">
+                  <div className="flex justify-between mb-1">
+                    <span className="text-xs text-gray-400">Password strength:</span>
+                    <span className="text-xs font-semibold">
+                      {passwordStrength.score === 0 && "Very weak"}
+                      {passwordStrength.score === 1 && "Weak"}
+                      {passwordStrength.score === 2 && "Fair"}
+                      {passwordStrength.score === 3 && "Good"}
+                      {passwordStrength.score === 4 && "Strong"}
+                    </span>
+                  </div>
+                  <div className="w-full h-1 bg-gray-700 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full transition-all duration-300 ${
+                        passwordStrength.score === 0 ? "w-0" :
+                        passwordStrength.score === 1 ? "w-1/4 bg-red-500" :
+                        passwordStrength.score === 2 ? "w-2/4 bg-orange-500" :
+                        passwordStrength.score === 3 ? "w-3/4 bg-yellow-500" :
+                        "w-full bg-green-500"
+                      }`}
+                    ></div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
+                    <div className={`flex items-center ${passwordStrength.hasMinLength ? "text-green-500" : "text-gray-500"}`}>
+                      <span className="mr-1">{passwordStrength.hasMinLength ? "✓" : "○"}</span>
+                      <span>At least 8 characters</span>
+                    </div>
+                    <div className={`flex items-center ${passwordStrength.hasUppercase ? "text-green-500" : "text-gray-500"}`}>
+                      <span className="mr-1">{passwordStrength.hasUppercase ? "✓" : "○"}</span>
+                      <span>Uppercase letter</span>
+                    </div>
+                    <div className={`flex items-center ${passwordStrength.hasLowercase ? "text-green-500" : "text-gray-500"}`}>
+                      <span className="mr-1">{passwordStrength.hasLowercase ? "✓" : "○"}</span>
+                      <span>Lowercase letter</span>
+                    </div>
+                    <div className={`flex items-center ${passwordStrength.hasNumber ? "text-green-500" : "text-gray-500"}`}>
+                      <span className="mr-1">{passwordStrength.hasNumber ? "✓" : "○"}</span>
+                      <span>Number</span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-1 md:space-y-2">
@@ -128,6 +205,24 @@ export default function ResetPasswordPage({ params }: { params: any }) {
                     {showConfirmPassword ? <Eye size={16} /> : <EyeOff size={16} />}
                   </button>
                 </div>
+
+                {/* Password match indicator */}
+                {formData.confirmPassword && (
+                  <div className="mt-2">
+                    <div className={`flex items-center text-xs ${
+                      formData.password === formData.confirmPassword ? "text-green-500" : "text-red-500"
+                    }`}>
+                      <span className="mr-1">
+                        {formData.password === formData.confirmPassword ? "✓" : "✗"}
+                      </span>
+                      <span>
+                        {formData.password === formData.confirmPassword
+                          ? "Passwords match"
+                          : "Passwords do not match"}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <Button

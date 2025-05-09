@@ -99,13 +99,13 @@ export function SessionSidebar() {
   }
 
   return (
-    <div className="space-y-4 h-full px-6 md:p-6 bg-[#1E293B]">
+    <div className="flex flex-col h-full px-6 md:p-6 bg-[#1E293B]">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl text-white font-bold">Chat Sessions</h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             {/* <Button variant="ghost"  size="icon" className="text-white hover:bg-[#2a3548] hover:text-white h-10 w-10"> */}
-              <PlusCircle color="white" className="h-6 w-6" />
+              <PlusCircle color="white" className="h-6 w-6 cursor-pointer" />
             {/* </Button> */}
           </DialogTrigger>
           <DialogContent className="bg-[#1E293B] z-80 text-white border-[#2a3548]">
@@ -131,7 +131,7 @@ export function SessionSidebar() {
         </Dialog>
       </div>
 
-      <div className="space-y-4">
+      <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
         {isLoading ? (
           // Loading skeletons
           Array(4)

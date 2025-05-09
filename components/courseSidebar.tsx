@@ -9,24 +9,11 @@ import { fetchCourseLectures } from "@/lib/ApiService"
 import { Skeleton } from "@/components/ui/skeleton"
 import { VideoModal } from "./VideoModal"
 
-// Define interfaces for type safety
-interface Lecture {
-  id: number | string;
-  title: string;
-  stream_url: string;
-  [key: string]: any; // For any other properties
-}
-
-interface VideoData {
-  streamUrl: string;
-  title: string;
-}
-
 export function CourseSidebar() {
   const { selectedCourseId } = useCourse()
-  const [activeVideoId, setActiveVideoId] = useState<string | number | null>(null)
+  const [activeVideoId, setActiveVideoId] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedVideo, setSelectedVideo] = useState<VideoData | null>(null)
+  const [selectedVideo, setSelectedVideo] = useState(null)
 
   const {
     data: lectures = [],
@@ -38,7 +25,7 @@ export function CourseSidebar() {
     enabled: !!selectedCourseId,
   })
 
-  const handleLectureClick = (lecture: Lecture) => {
+  const handleLectureClick = (lecture:any) => {
     setActiveVideoId(lecture.id)
     setSelectedVideo({ streamUrl: lecture.stream_url, title: lecture.title })
     setIsModalOpen(true)
@@ -127,7 +114,7 @@ export function CourseSidebar() {
         </h3>
 
         <div className="flex-1 overflow-y-auto pr-2 space-y-2 custom-scrollbar">
-          {lectures.map((lecture: Lecture, index: number) => (
+          {lectures.map((lecture:any, index:any) => (
             <div
               key={lecture.id}
               className={`p-3 rounded-lg cursor-pointer transition-all duration-200 group ${

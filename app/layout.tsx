@@ -33,6 +33,7 @@ export default function RootLayout({
         <Toaster
         richColors
         position="top-center"
+      
         
   // toastOptions={{    
   //   style: {

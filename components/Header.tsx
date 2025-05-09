@@ -47,7 +47,7 @@ export function Header() {
   const getScreenTitle = () => {
     if (pathname === "/main") return "AI Chatbot";
     if (pathname === "/main/courses") return "Digital Courses";
-    if (pathname === "/main/bookCoach") return "Book a Coach";
+    if (pathname === "/main/bookCoach") return "Coach Booking";
     if (pathname.startsWith("/main/courses/")) return "Course Details";
 
     // Default title if no match
