@@ -39,7 +39,6 @@ interface Message {
   attachments?: File[]
   image?: string
 }
-const BASE_URL = "http://18.216.181.203:5000";
 
 
 export function ChatInterface() {
@@ -348,7 +347,7 @@ export function ChatInterface() {
                 {message.file_url && (
                   <div className="mt-2">
                     <Image
-                      src={`${BASE_URL}${message.file_url}` || "/placeholder.svg"}
+                      src={`${message.file_url}` || "/placeholder.svg"}
                       width={200}
                       height={150}
                       alt="Attached image"
