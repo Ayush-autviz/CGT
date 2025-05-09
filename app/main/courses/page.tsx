@@ -48,7 +48,7 @@ export default function DigitalCoursesPage() {
                     </div>
                   </div>
                 ))
-            : courses.map((course) => {
+            : courses.map((course:any) => {
                 const isSelected = selectedCourseId === course.id.toString()
 
                 return (
