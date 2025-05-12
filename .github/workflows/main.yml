@@ -21,6 +21,6 @@ jobs:
         script: |
         
             cd /home/ubuntu/CGT-Frontend/CGT
-            git pull origin main
-            docker compose up -d --build 
-            docker image prune -fa     
+            sudo git pull origin main
+            sudo docker compose up -d --build 
+            sudo docker image prune -fa     
