@@ -96,7 +96,7 @@ export default function DigitalCoursesPage() {
               return (
                 <div
                   key={course.id}
-                  onClick={() => setSelectedCourseId(course.id.toString())}
+                //  onClick={() => setSelectedCourseId(course.id.toString())}
                   className={`rounded-2xl cursor-pointer transition-all duration-300 transform ${
                     isSelected
                       ? "border-2 border-[#F6BE00] scale-[1.02] shadow-lg shadow-[#F6BE00]/20"
@@ -111,6 +111,7 @@ export default function DigitalCoursesPage() {
                     count={course.video_count}
                     progress={0}
                     action="Start Course"
+                    description={course.description || "Explore this course to enhance your trading skills and knowledge."}
                   />
                 </div>
               )

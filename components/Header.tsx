@@ -20,13 +20,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+
 import { Label } from "@/components/ui/label";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import useAuthStore from "@/stores/authStore";
 import { updateUserName, changePassword } from "@/lib/ApiService";
+import { Input } from "./ui/input";
 
 export function Header() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);

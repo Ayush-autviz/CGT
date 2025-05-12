@@ -167,9 +167,9 @@ export default function CourseVideosPage() {
                 <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-[#F6BE00] transition-colors">
                   {lecture.title}
                 </h3>
-                <p className="text-sm text-[#A4A4A4]">
+                {/* <p className="text-sm text-[#A4A4A4]">
                   {lecture.duration || `${Math.floor(Math.random() * 10) + 5} min`}
-                </p>
+                </p> */}
               </div>
             </div>
           ))}
