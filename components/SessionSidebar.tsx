@@ -53,7 +53,7 @@ export function SessionSidebar() {
     },
     onError: (error) => {
       console.error("Session creation failed:", error);
-      toast.error("Session Creation Failed", createErrorToast("Session Creation Failed", error));
+      toast.error("Error", createErrorToast("Session Creation Failed", error));
     },
   })
 
@@ -76,7 +76,7 @@ export function SessionSidebar() {
     },
     onError: (error) => {
       console.error("Session deletion failed:", error);
-      toast.error("Session Deletion Failed", createErrorToast("Session Deletion Failed", error));
+      toast.error("Error", createErrorToast("Session Deletion Failed", error));
     },
   })
 
@@ -84,7 +84,10 @@ export function SessionSidebar() {
     if (newSessionTitle.trim()) {
       createSessionMutation.mutate(newSessionTitle)
     } else {
-      toast.error("Session name cannot be empty.") // Validation toast
+      toast.error("Error", {
+        description: "Session name cannot be empty.",
+        duration: 3000,
+      }) // Validation toast
     }
   }
 

@@ -70,7 +70,7 @@ export function Header() {
     },
     onError: (error) => {
       console.error("Error updating username:", error);
-      toast.error("Profile Update Failed", createErrorToast("Profile Update Failed", error));
+      toast.error("Error", createErrorToast("Profile Update Failed", error));
     },
   });
 
@@ -85,7 +85,7 @@ export function Header() {
     },
     onError: (error) => {
       console.error("Error changing password:", error);
-      toast.error("Password Change Failed", createErrorToast("Password Change Failed", error));
+      toast.error("Error", createErrorToast("Password Change Failed", error));
     },
   });
 

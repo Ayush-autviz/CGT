@@ -4,7 +4,7 @@ import axios from 'axios';
 //export const BASE_URL = "http://18.216.181.203:5000/";
 
 export const BASE_URL = "http://18.216.181.203:5000/";
-
+//export const BASE_URL = "https://lwj8k3bb-5000.inc1.devtunnels.ms/";
 
 
 // Create axios instance
@@ -143,7 +143,7 @@ export const getSessionMessages = async (sessionId: number) => {
 
 export const createSessionMessage = async (
   sessionId: number,
-  message: { content: string; file?: File }
+  message: { content: string; files?: File[] }
 ) => {
   try {
     const token = useAuthStore.getState().token;
@@ -153,9 +153,14 @@ export const createSessionMessage = async (
     if(message.content){
       formData.append('content', message.content);
     }
-    // formData.append('content', message.content);
-    if (message.file) {
-      formData.append('file', message.file);
+
+    // Support for multiple files (up to 4)
+    if (message.files && message.files.length > 0) {
+      message.files.forEach((file, index) => {
+        if (index < 4) { // Limit to 4 files
+          formData.append('files[]', file);
+        }
+      });
     }
 
     const response = await api.post(`api/assistant/sessions/${sessionId}/messages`, formData);

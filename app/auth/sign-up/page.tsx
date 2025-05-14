@@ -38,9 +38,13 @@ export default function SignUpPage() {
     },
     onError: (error: any) => {
       console.error("Sign up failed:", error)
+
+      // Extract error message from response
+      const errorMessage = error?.response?.data?.error || error.message || "Something went wrong. Please try again.";
+
       // Show error toast
-      toast.error("Sign Up Failed", {
-        description: error.message || "Something went wrong. Please try again.",
+      toast.error("Error", {
+        description: errorMessage,
         duration: 5000,
       })
     },

@@ -26,8 +26,12 @@ export default function ForgotPasswordPage() {
     },
     onError: (error: any) => {
       console.error("Password reset request failed:", error)
-      toast.error("Request Failed", {
-        description: error.message || "Unable to send reset link. Please try again.",
+
+      // Extract error message from response
+      const errorMessage = error?.response?.data?.error || error.message || "Unable to send reset link. Please try again.";
+
+      toast.error("Error", {
+        description: errorMessage,
         duration: 5000,
       })
     },

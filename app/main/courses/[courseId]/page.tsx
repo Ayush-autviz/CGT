@@ -26,7 +26,7 @@ export default function CourseVideosPage() {
   const params = useParams()
   const router = useRouter()
   const courseId = params.courseId as string
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedVideo, setSelectedVideo] = useState<{
     streamUrl: string
@@ -64,8 +64,8 @@ export default function CourseVideosPage() {
   }
 
   const handleThumbnailError = () => {
-    toast.error("Failed to load thumbnail", {
-      description: "Using placeholder image instead",
+    toast.error("Error", {
+      description: "Failed to load thumbnail. Using placeholder image instead.",
       duration: 3000,
     })
   }
@@ -105,14 +105,14 @@ export default function CourseVideosPage() {
   return (
     <div className="p-6 bg-[#0A0F1D] min-h-screen">
       <div className="mb-8">
-        <Button 
-          onClick={handleBackClick} 
-          variant="ghost" 
+        <Button
+          onClick={handleBackClick}
+          variant="ghost"
           className="mb-4 text-[#A4A4A4] hover:text-white hover:bg-[#1E293B]"
         >
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to Courses
         </Button>
-        
+
         <h1 className="text-2xl text-white font-bold mb-2">{courseTitle}</h1>
         <div className="flex items-center text-sm text-[#A4A4A4]">
           <FileVideo className="h-4 w-4 text-[#F6BE00] mr-2" />

@@ -40,8 +40,12 @@ export default function ResetPasswordPage({ params }: { params: any }) {
     },
     onError: (error: any) => {
       console.error("Password reset failed:", error)
-      toast.error("Password Reset Failed", {
-        description: error.message || "Unable to reset password. Please try again.",
+
+      // Extract error message from response
+      const errorMessage = error?.response?.data?.error || error.message || "Unable to reset password. Please try again.";
+
+      toast.error("Error", {
+        description: errorMessage,
         duration: 5000,
       })
     },

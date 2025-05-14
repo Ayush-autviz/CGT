@@ -21,8 +21,11 @@ export default function VerificationPage() {
       })
     },
     onError: (error: any) => {
-      toast.error("Failed to Resend", {
-        description: error.message || "Unable to resend verification email. Please try again.",
+      // Extract error message from response
+      const errorMessage = error?.response?.data?.error || error.message || "Unable to resend verification email. Please try again.";
+
+      toast.error("Error", {
+        description: errorMessage,
         duration: 5000,
       })
     },
